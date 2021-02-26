@@ -248,7 +248,39 @@ Availability (可用性) ：授权者可以使用该网站。如：你使用你�
 ### Types of DDoS Attacks
 
 1. Volume Based Attacks : works on saturating the target network's bandwidth with heavy volumes of traffic. 
-   	e.g.: Ping (ICMP) Flood (用大量的 ICMP Echo Request 诈骗服务器，使其不断响应) and UDP Floods. 
+   e.g.: Ping (ICMP) Flood (用大量的 ICMP Echo Request 诈骗服务器，使其不断响应) and UDP Floods. 
 2. Protocal Attacks : 攻击目标设备的 网络层 ，对其 防火墙 和 其他服务器资源 (server resources) 进行挖矿 (exploit) 。
-       e.g.: Ping of Death, SYN floods and Smurf DDoS to name a few. 
-3. Application Layer Attacks : 
+      e.g.: Ping of Death, SYN floods and Smurf DDoS to name a few. (SYN Flood Attack 发送请求利用 TCP 握手，但一直发送建立连接请求，服务器返回的确认信息一直不理，使服务器一直响应，占用资源。)
+2. Application Layer Attacks : crash the web servers ，这种方式相对老练。
+   e.g.: HTTP Flood 许多正当的 HTTP GET or POST 请求来污染服务器。
+
+### DDoS Attack Prevention
+
+1. Acquire more Bandwidth
+2. Have a Response plan ready
+3. Configure Network Hardware against an attack
+4. Make use of a Cloud
+5. Monitor your website traffic
+6. Be aware of the warning signs
+7. Have everything up to date
+8. Use DDoS prevention tools like Imperva, Cloudfare, F5 Networks, Arbor DDoS
+
+## Who is a Cyber Security expert?
+
+An individual employed by an orgnization to protect their data. 
+
+### What are they doing?
+
+Use techniques to 
+
+1. Finding weakness
+2. Monitor systems
+3. Network breach
+
+然后修复相对较弱的地方，增强容易被攻击的点。
+
+### Domains in Cyber Security
+
+1. Asset Security
+2. Security achitecture and engineering
+3. Communication and network Security
