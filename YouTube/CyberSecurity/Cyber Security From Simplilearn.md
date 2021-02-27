@@ -284,3 +284,28 @@ Use techniques to
 1. Asset Security
 2. Security achitecture and engineering
 3. Communication and network Security
+4. Identity and access mannagement
+5. Security operations
+6. Security assessment and Testing
+7. Software development Security
+8. Security and risk management
+
+## Ethical hacking
+
+防止本公司的服务器被其他黑客攻击。
+
+### six different phases : 
+
+1. Reconnaissance （工具：NMAP、hping）
+2. Scanning phase ( NMAP、nexpose )
+3. Gaining access
+4. Maintaining access （ metasploit ）
+5. Clearing tracks
+6. Reporting
+
+### needed skills :
+
+1. Operating environment: Windows, Linux, Unix, MacOS
+2. Programming language: HTML, PHP, Python, SQL, JS
+3. Networking: 是基础。
+4. 证书
