@@ -309,3 +309,29 @@ Use techniques to
 2. Programming language: HTML, PHP, Python, SQL, JS
 3. Networking: 是基础。
 4. 证书
+
+### Types of Hackers
+
+1. Black Hat Hacker ：黑客。
+2. White Hat Hacker ：Ethical Hacker
+3. Gray Hat Hacker ：both
+4. Script Kiddies ：业余爱好者，主要使用现成的工具和代码。目的是装逼，或者随便玩儿玩儿。
+5. Nation Sponsored Hacker ：政府黑客。
+6. Hacktivist ：主要是宣传政治。
+
+### Skills of an Ethical Hacker
+
+1. 知道这些操作系统的 desktop 和 server 版各如何工作
+2. PHP, Python, Ruby, HTML
+3. 深入理解计算机网络
+4. 各种安全评估
+5. 当地的安全法和标准
+6. 全球性的与网络相关的证书
+
+### Ethical Hacking Tools
+
+1. Nessus ：检测漏洞
+2. metasxploit ：检验漏洞是否真的存在
+3. wireshark ：查看传输信息发送的数据包
+4. NMAP ：查看使用的各种协议
+5. sqlmap ：sql 注入
