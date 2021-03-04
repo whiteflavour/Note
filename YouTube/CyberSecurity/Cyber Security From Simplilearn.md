@@ -298,9 +298,9 @@ Use techniques to
 
 1. Reconnaissance （工具：NMAP、hping）
 2. Scanning phase ( NMAP、nexpose )
-3. Gaining access
+3. Gaining access (Metasploit)
 4. Maintaining access （ metasploit ）
-5. Clearing tracks
+5. Clearing tracks ：保持连接，因为可能被改了密码等等，可以注入一个 Trojan 。
 6. Reporting
 
 ### needed skills :
@@ -335,3 +335,10 @@ Use techniques to
 3. wireshark ：查看传输信息发送的数据包
 4. NMAP ：查看使用的各种协议
 5. sqlmap ：sql 注入
+
+### How to Hack using Social Engineering
+
+1. Familiarity Exploit
+2. Phishing ：通过邮箱的形式伪造网站链接
+3. Exploiting Human Curiosity ：可能有人将病毒 U 盘故意丢在车库，有人有好奇心捡到了，就拿到自己电脑上去看，就中招了。
+4. Exploiting Human Greed
