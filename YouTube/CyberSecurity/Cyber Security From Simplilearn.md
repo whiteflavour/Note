@@ -342,3 +342,21 @@ Use techniques to
 2. Phishing ：通过邮箱的形式伪造网站链接
 3. Exploiting Human Curiosity ：可能有人将病毒 U 盘故意丢在车库，有人有好奇心捡到了，就拿到自己电脑上去看，就中招了。
 4. Exploiting Human Greed
+
+### Cryptography
+
+#### 一些网站：
+
+AES 加密算法是最强的。★
+
+spammimic.com ：可以将输入的一句话编码成垃圾邮件；对方收到后知道这是个垃圾邮件，就可以进入该网站进行解码。★
+
+aspencrypt.com：一个可以用于加密信息的网站。
+
+## Kali Demos
+
+### Phishing demo：
+
+打开 Kali 中的 Social engineering toolkit -> 选择 Social-Engeneering Attacks -> Website Attack Vectors -> Credential Harvester Attack Method -> Site Cloner -> 输入一个网站，回车 -> 在浏览器中输入自己的 ip ，发现已经变成了访问输入的那个网站。
+
+这样可以造一个假网站，给别人发送它的账户不安全，然后让他在假网站上输入帐号和密码。
