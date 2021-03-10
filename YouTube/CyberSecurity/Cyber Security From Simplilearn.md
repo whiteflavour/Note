@@ -360,3 +360,45 @@ aspencrypt.com：一个可以用于加密信息的网站。
 打开 Kali 中的 Social engineering toolkit -> 选择 Social-Engeneering Attacks -> Website Attack Vectors -> Credential Harvester Attack Method -> Site Cloner -> 输入一个网站，回车 -> 在浏览器中输入自己的 ip ，发现已经变成了访问输入的那个网站。
 
 这样可以造一个假网站，给别人发送它的账户不安全，然后让他在假网站上输入帐号和密码。
+
+### SQL Injection Attack Demo
+
+VMware 打开 OWASP Broken Web Apps VM 1.2 -> 在浏览器中访问它提供的 IP 地址 -> 点击 OWASP Mutillidae Ⅱ -> OWASP 2013 -> Injection (SQL) -> Bypass Authentication -> Login
+
+随便输入一个用户名和密码，登不上去。然后在用户名处输入一个 单引号 ，它会显示出错误信息。此时在用户名处输入：一个单引号，后接一个空格，`OR 1=1`，两个杠，一个空格（`' OR 1=1 -- `) 。然后输入回车，就能登录成功。
+
+原理：使用两个杠后面加空格，可以使你提供一个条件，即：1=1，若此条件成立，则能登录成功。★
+
+主要是要清楚 SQL 查询的工作原理，及 SQL 的结构。
+
+---
+
+另一个工具：
+
+打开 Kali 终端，输入`sqlmap` -> `sqlmap -u https://urlhere`。
+
+在此处输入一个域名。使用这个工具不需要知道 sql 的原理。这个 Demo 不能演示，因为是违法的。
+
+### Virtual Private Network (VPS)
+
+一些软件：
+
+CyberGhost (cyberghost.com) ：我使用的它。具体谁好根据需求来。
+
+expressvpn.com
+
+nordvpn.com
+
+HIDEMYASS!
+
+SAFERVPN
+
+### Virtual Private Server (VPS)
+
+Example of VPS ：
+
+GoDaddy
+
+networksolutions
+
+register.com
