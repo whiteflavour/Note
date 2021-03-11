@@ -402,3 +402,20 @@ GoDaddy
 networksolutions
 
 register.com
+
+### Cloud:
+
+rackspace.com
+
+amazon
+
+### Other keywords
+
+Tor 浏览器 (cmyip.com 可以查看自己的 IP)
+
+Keylogger
+
+Firewall (GlassWire 是一个网络流量监控工具，也可以配置防火墙；Sophos 是一个杀毒软件)
+
+Rootkit (非法登录计算机，可以隐藏其他软件)
+
