@@ -419,3 +419,58 @@ Firewall (GlassWire 是一个网络流量监控工具，也可以配置防火墙
 
 Rootkit (非法登录计算机，可以隐藏其他软件)
 
+### Ethical Hacking Techniques
+
+Black box
+
+White box
+
+Gray box
+
+### Ethical hacking tools
+
+beef
+
+metasploit
+
+NMAP
+
+Nessus : vulnerability scanner
+
+Wireshark
+
+sqlmap
+
+John the ripper : password hacking tool
+
+back track : network security suite
+
+### Areas of ethical hacking
+
+Network services : use GlassWire . (e.g. : Firewall testing)
+
+Web application : (e.g. : Outlook)
+
+Client side : (e.g. : Media player)
+
+Wireless : (e.g : tablet or smartphones)
+
+Social engineering
+
+## Demo on Metasploit
+
+### SQL Injection ：
+
+进入上次 sql injection demo 的页面 -> OWASP 2013 -> A1 - Injection (SQL) -> Extract data 
+
+输入`' OR 1=1 -- `，点击 view account details 。
+
+### Password Attack：（破解使用同一台电脑的其他用户的密码）
+
+登录 Win7 虚拟机，打开 Cain 软件 -> 点击 加号 ，创建，即可查看该电脑上的用户和密码的 hash 值 -> 右击 hash 值，可以进行攻击，但需要的时间很长，不现实，后面我们有更简单的方法（见下述 demo）。
+
+### Metasploit Attack
+
+有点难
+
+先扫描端口，然后攻击它的端口，进入它的 LInux 目录，读取它的 /etc/passwd 、 /etc/shadow ，获取其 用户名 和 密码 的 hash 值。
