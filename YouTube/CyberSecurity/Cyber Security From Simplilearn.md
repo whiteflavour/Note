@@ -474,3 +474,7 @@ Social engineering
 有点难
 
 先扫描端口，然后攻击它的端口，进入它的 LInux 目录，读取它的 /etc/passwd 、 /etc/shadow ，获取其 用户名 和 密码 的 hash 值。
+
+## 参加工作？
+
+网络安全，黑客 这些工作，需要考证。
