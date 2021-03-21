@@ -323,3 +323,133 @@ volatile （可变的，不稳定的，易挥发的）关键字：保证其他�
 
 ## 第四章：JSP
 
+### JSP: 
+
+JSP 实际上是一个精心设计的 Servlet，是语法糖。
+
+JSP 编译后的类最终取决于它在其中运行的 Web 容器。
+
+JSP 默认内容类型：text/html；字符编码：ISO-8859-1 。
+
+Scriplet (`<%%>`) 的缩进形式可能会影响 IDE （IDEA）对其语法的判断：★
+
+```jsp
+<%
+	... 
+%> ... <%
+...
+%>
+```
+
+### Directive: 
+
+属性：
+
+有很多属性，可以通过禁用 session 和 buffer 来提高性能，其中 buffer 有些缺点。
+
+永远不要修改 isThreadSafe 属性：如果你的 JSP 不是线程安全的，它就是错误的。★
+
+### Web App 的根目录：
+
+Web 。★
+
+相对路径：从该 JSP 或者 Servlet 存在的路径开始。★
+
+### `<jsp>`标签
+
+`<jsp:forward page="">`：不是重定向，此标签之后的代码将被忽略。（重定向不会）★
+
+`<jsp:useBean>`：在页面中声明一个 JavaBean。
+
+`<jsp:getProperty>`：从上述标签中声明的 bean 中获取属性值（通过 getter 方法）。
+
+`<jsp:setProperty>`：设置属性（通过 setter 方法）。
+
+### JSP  response 对象的限制
+
+JSP 中有许多隐式对象。
+
+不应该调用 getWriter 和 getOutputStream 方法，不应该设置内容类型或字符编码、刷新或重置缓存或者修改缓存大小。这些工作 JSP 已经完成了，重复执行它们会引起问题。★
+
+更多信息，阅读 JavaServer Pages 2.3 规范文档：http://download.oracle.com/otndocs/jcp/jsp-2_3-mrel2-spec/ 。
+
+### WEB-INF 目录：
+
+该目录中的文件禁止通过 Web 访问（URL）。
+
+### 常见模式：
+
+有 Servlet 接受请求，实现业务逻辑及必须的数据存储或读取，创建可由 JSP 轻松处理的数据模型，最终将请求转发给 JSP。★
+
+## 第五章、会话
+
+可以使用网络嗅探工具追踪（如：Fiddler 或 Wireshark） HTTP 请求和响应的信息。
+
+HttpServletResponse 中两个重写 URL 的方法：encodeURL 、encodeRedirectURL 。
+
+### 会话的漏洞：
+
+开发者应该一直保持对安全事件的关注。★
+
+在执行重要任务、含有敏感数据的应用程序中，使用某些商业扫描器检测应用丑程序中的漏洞是明智的选择。
+
+关于 Web app 和会话的更多信息，以及如何检测和解决它们，访问 OWASP 网站：https://www.owasp.org 。
+
+---
+
+不要与不信任的应用程序共享域名。★
+
+会话 ID cookie 中总是应该包含 HttpOnly 特性。★
+
+---
+
+关于 SSL 会话 ID 工作方式的更多信息，查看： RFC 2246 "The TLS Protocol" 。
+
+SSL 配置的更多细节，查看 Tomcat 文档。★
+
+### 测试会话是否创建：
+
+getSession() 实际调用的是 getSession(true)，可以调用 getSession(false) 来测试是否已经创建会话。
+
+---
+
+在浏览器中很难找回之前的会话。★
+
+### HttpSession 的方法：
+
+有许多方法，最重要的之一：invalidate()：销毁会话并解除所有绑定到会话的数据。即使客户浏览器使用相同的会话 ID 发起了另一个请求，已经无效的会话也不能再使用。新的会话将被创建，并响应中将包含新的会话 ID 。★
+
+---
+
+必须考虑存储数据的大小。
+
+Vector 对于 ArrayList 是线程安全的。
+
+在 urlPatterns 中使用通配符：/do/* ：任何 /do/... 都能访问。★
+
+### 迁移会话应付会话攻击（修改会话 ID）：
+
+changeSessionId() 。
+
+### 会话最有用的特性之一 —— 会话事件：
+
+用于检测会话发生变化的工具——监听器。
+
+**几种监听器**：
+
+javax.servlet.annotation.WebListener 。
+
+javax.servlet.annotation.BindingListener ：特别有趣，不需要添加注解或部署描述符配置。若某类实现该接口，它将把自己的状态当作会话特性。
+
+记录会话创建和销毁的信息，是监听器的常用方式，管理员可能会保存这些信息。★
+
+---
+
+Tomcat 关闭时，它将把会话持久到文件系统中，大多数情况可以禁止该行为，具体参考容器官方文档。
+
+### 将使用会话的应用程序群集化：
+
+各个容器的配置不同，具体参考容器官方文档。
+
+## 第六章、EL
+
