@@ -478,3 +478,20 @@ Social engineering
 ## 参加工作？
 
 网络安全，黑客 这些工作，需要考证。
+
+## Best Books for Ethical Hacking
+
+1. The Basics of Hacking and Penetration Testing —— Patrick Engebretson
+2. Hacking: A Beginner's Guide to Computer Hacking, Basic Security and Penetration Testing —— John Slavio
+3. Hacking: The Art of Exploitation —— John Erickson
+4. Kali Linux - An Ethical Hacker's Cookbook —— Himanshu Sharma
+5. Metasploit - The Penetration Tester's Guide —— David Kennedy, Jim O'Gorman, Devon Kearns, Mati Aharoni
+6. Penetration Testing: A Hands-On Introduction to Hacking —— Georgia Weidman
+7. The Hacker Playbook 3 —— Peter Kim
+8. Black Hat Python: Python Programming for Hackers and Pentesters —— Justin Seitz
+9. The Web Application Hacker's Handbook: Finding and Exploiting Security Flaw —— Dafydd Stuttard, Marcus Pinto
+10. Web Security Testing Cookbook: Systematic Techniques to Find Problems Fast —— Paco Hope, Ben Walther
+
+## SimplyLearn
+
+有个 Ethical Hacking Course Overview ，这个课应该不错。太贵了。

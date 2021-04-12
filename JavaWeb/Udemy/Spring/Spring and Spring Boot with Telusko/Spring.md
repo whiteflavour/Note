@@ -457,3 +457,206 @@ public class HomeController {
 
 ### 22. Tomcat Jasper
 
+要将 JSP 转换成 Servlet，需要一个依赖，Tomcat Jasper。注意：版本需要与 Tomcat 版本对应。
+
+这样就能显示 JSP 页面了，而不是下载它。
+
+### 23. Accepting User Input
+
+做两个数相加：
+
+index.jsp: 
+
+```jsp
+<form action="add" method="get">
+  Enter a number: <input type="text" name="number-a"/>
+  Enter another number: <input type="text" name="number-b"/>
+  <input type="submit" value="Add"/>
+</form>
+```
+
+HomeController.java: 
+
+```java
+@Controller
+public class HomeController {
+    @RequestMapping("/")
+    public String home() {
+        return "index.jsp";
+    }
+
+    // 可以在此方法中处理逻辑，也可以另外创建一个 Calculator 类来进行。
+    @RequestMapping("add")
+    public String add() {
+        return "result.jsp";
+    }
+}
+```
+
+result.jsp: 
+
+```jsp
+Result is : 
+```
+
+此时提交后会显示 result.jsp 页面，但是不会显示结果，因为我们并未做任何其他处理，只是构造了一个页面。
+
+**显示结果：**
+
+改造 HomeController.java 中的`add()`方法：
+
+HomeController.java: 
+
+```java
+@RequestMapping("add")
+public String add(HttpServletReqeust request) {
+    int num1 = Integer.parseInt(request.getParameter("num1"));
+    int num2 = Integer.parseInt(request.getParameter("num2"));
+
+    int sum = num1 + num2;
+
+    // 2. Session: 
+    HttpSession session = request.getSession();
+    session.setAttribute("sum", sum);
+
+    // 3. RequestDispatcher
+    // 4. Cookie
+    // 应该 Servlet 和 JSP 中能用到的转发技术都行。
+
+    // 接下来有几种方式将结果转发给 JSP
+    // 1. URL Redirecting: 
+    return "result.jsp?sum=" + sum;
+}
+```
+
+result.jsp: 
+
+```jsp
+<%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false"%>
+Result is : ${sum}
+```
+
+**工作原理：**
+
+感觉 Dispatcher Servlet 就像是原始 Servlet 中的`service()`方法与 web.xml 配置文件的综合，它可以寻找到对应路径的映射，每次提交都是提交给 Dispatcher Servlet 。★
+
+---
+
+我们还能使逻辑处理更加简洁，请看下节。
+
+### 24. @RequestParam
+
+代码改进：
+
+HomeController.java: 
+
+```java
+@RequestMapping("add")
+// 使用 @RequestParam 注解获取 URL 参数，session 对象也由 Spring Boot 提供
+public String add(@RequestParam("num1") int num1, @RequestParam("num2") int num2, HttpSession session) {
+    int sum = num1 + num2;
+    session.setAttribute("sum", sum);
+
+    return "result.jsp";
+}
+```
+
+那个 session 对象也可以去掉，下一节讲解。
+
+> 经过测试，貌似不要 @RequestParam 也能工作 。。。
+
+### 25. @ModelAndView
+
+再改进：
+
+HomeController.java: 
+
+```java
+@RequestMapping("add")
+public ModelAndView add(@RequestParam("num1") int num1, @RequestParam("num2") int num2) {
+    sum = num1 + num2;
+
+    ModelAndView modelAndView = new ModelAndView();
+    modelAndView.addObject("sum", sum);
+    
+    // 注意是 setViewName ，而不是 setView 
+    modelAndView.setViewName("result.jsp");
+
+    return modelAndView;
+}
+```
+
+> ModelAndView 的好处就是它既包含了数据也包含了页面。
+
+### 26. Prefix and Suffix
+
+若需要使 JSP 文件不被别人输入 URL 直接访问（绕过了 Controller ），将它们放入 WEB-INF 文件夹；若需要将它们放入 webapp 中的一个文件夹中，需要在 application.properties 文件中做一些配置：Google 搜索 spring boot application properties 。
+
+找到 Spring MVC ，找到 prefix 和 suffix ，我们需要这两个。
+
+application.properties: 
+
+```properties
+spring.mvc.view.prefix=/view/
+spring.mvc.view.suffix=.jsp
+
+# 若需要使其对外不可见 (private) ，则使用下面这句：
+spring.mvc.view.prefix=/WEB-INF/view/
+```
+
+> 缺点：所有的 JSP 后缀文件都只能放在同一个目录中，并且返回值不能再加后缀。★
+
+这样，我们的 HomeController.java 文件中就只能这样写了：
+
+HomeController.java:
+
+```java
+...
+public ModelAndView add( ... ) {
+    ...
+    
+    // 注意：这里不能加 .jsp 
+    modelAndView.setViewName("result");
+
+    return modelAndView;
+}
+```
+
+### 27. Model and ModelMap
+
+其他方式实现：
+
+HomeController.java:
+
+```java
+...
+public ModelAndView add( ... ) {
+    ...
+
+    // 可以直接在 ModelAndView 的构造方法中传递 JSP 文件名。★
+    ModelAndView modelAndView = new ModelAndView("reuslt");
+    modelAndView.addObject("sum", sum);
+    
+    return modelAndView;
+}
+```
+
+HomeController.java:
+
+```java
+@RequestMapping("add")
+// 也可以使用 ModelMap，它们唯一的区别就是 ModelMap 是装在一个 Map 中的。★
+public String add(@RequestParam("num1") int num1, @RequestParam("num2") int num2, Model model) {
+    sum = num1 + num2;
+
+    model.addAttribute("sum", sum);
+
+    return "result";
+}
+```
+
+#### Model or ModelAndView? 
+
+根据自己的情况。
+
+> 建议：若只需要数据，或者先只需数据，后面再返回页面，则使用 Model；若数据和页面都需要，则使用 ModelAndView 更好。
