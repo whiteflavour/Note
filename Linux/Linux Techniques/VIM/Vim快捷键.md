@@ -27,3 +27,46 @@ Shift + j (大 j ）：将下一行移动到本行（连接这两行）。
 ## 粘贴
 
 Shift + p ：在该行的上一行或者光标的前面粘贴。★
+
+## 区域控制：
+
+From: 
+
+https://blog.csdn.net/topgun_chenlingyun/article/details/48393277
+
+https://blog.csdn.net/weixin_33788244/article/details/85885645
+
+### 区域删除：
+
+`di"`：删除`"`内的内容 ，i 表示 inside. 
+
+`di{` ：删除`{`内的内容。 
+
+... 
+
+`dta`：从该字符删除到字符`a`位置，t 表示 to 。（不删除 a ）
+
+... 
+
+`dfa`：删除到直到找到 a ，f 表示 find 。（删除 a ）
+
+...
+
+### 区域更改：
+
+`ci"`
+
+...
+
+### 区域复制：
+
+`yi"`
+
+...
+
+### 区域选择：
+
+`vi"`
+
+...
+
