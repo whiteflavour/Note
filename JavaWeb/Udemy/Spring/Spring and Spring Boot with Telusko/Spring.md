@@ -1,4 +1,4 @@
-# Spring and Spring boot
+# Spring and Spring boot ( Ending: 2021.5.8 )
 
 ## 1. Getting Started
 
@@ -2133,7 +2133,7 @@ public AuthenticationProvider authProvider() {
     // 此方法，从数据库中获取数据。
     provider.setUserDetailService(userDetailService);
     // 这里我们不使用加密密码和 Hash 值，因为只是演示并理解其中的作用。现实中不推荐这么做。★★
-    provider.setPasswordEncoder(NoOpPasswordEncoder.getInstans());
+    provider.setPasswordEncoder(NoOpPasswordEncoder.getInstance());
 
     return provider;
 }
@@ -2169,7 +2169,7 @@ UserRepository.java:
 
 ```java
 public interface UserRepository extends JpaRepository<User, Long> {
-    User findByusername(String username);
+    User findByUsername(String username);
 }
 ```
 
@@ -2245,5 +2245,106 @@ public class MyUserDetailService implements UserDetailService {
 
 使用 Security ，首先看 AppSecurityConfig ，它是最重要的。然后后面就是照着流程来了。★★
 
+> 注：Entity 的类名必须与数据库表名一致。★
+
 ### 65. Spring Security BCrypt Password Encoder
 
+使用密文 ( ciphertext ) 并不安全，容易被解密，于是我们使用 Hash 值。★★
+
+> 去 browserling 这个网站，可以使用 BCrypt 将密码转换为对应的 Hash 值，其中，最前面的`$2a`表示这是 BCrypt ，`$12`表示执行了 12 轮 ( round ) ，下一个`$`后面才是真正的密码。★★★
+
+#### 使用 BCrypt：
+
+AppSecurityConfig.java:
+
+```java
+...
+public AuthenticationProvider authProvider() {
+    ...
+    provider.setPasswordEncoder(new BCryptPasswordEncoder());
+    ...
+}
+...
+```
+
+> 注：此时数据库中用户的密码必须保存为 BCrypt 加密后的形式才能工作，密码为其他形式 ( 如：plain text ) 的用户不能工作。但是输入密码的时候只需输入 plain text 形式即可。★★
+
+**缺点：**万一忘记密码，还需要将数据库中的 Hash 值解密出来。★
+
+下节课讲如何自定义登录页面的样式。
+
+### 66. Spring Boot Security OAuth2
+
+#### OAuth2 的作用：
+
+可以看到现在有些网站可以使用 Google 或者 FaceBook 帐号登录，此时你就不需要管这些用户的数据了，由 Google 和 FaceBook 来管。这就是 OAuth2 。
+
+#### 原理：
+
+当你选择使用 Google 帐号登录时，Google 会给你一个 Token，你使用这个 Token，即可登录该网站。★
+
+#### 使用：
+
+需要添加一个依赖：mvnrepository.com -> search spring security oauth2 autoconfigure 。
+
+> 在 Spring 4 或者 5 之前，可以直接导入 Spring Security 依赖；Spring 5 之后就需要上述 Autoconfigure 依赖了。★
+
+AppSecurityConfig.java:
+
+```java
+// 添加此注解，Sso 表示 Single Sign On 。
+@EnableOAuth2Sso
+public AuthenticationProvider authProvider() {
+    // 删掉其他方法，我们只需要此方法：
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.csrf().disable()
+            .authorizeRequest().antMatchers("/login").permitAll()
+            .anyReqeust().authenticated();
+    }
+}
+```
+
+此时要使用 Google 帐号登录，还需要做一些配置：
+
+application.properties:
+
+> 注：此配置应该不能用，那些 URL 访问不了。★★
+
+```properties
+# 将下述 Google Cloud 上获取的 Client ID 和 Client Secret 填入下面对应的部分。
+security.oauth2.client.clientId=<CLINET_ID>
+security.oauth2.client.clientSecret=<CLINET_SECRET>
+security.oauth2.client.accessTokenUri=https://www.googleapis.com/oauth2/v3/token
+security.oauth2.client.userAuthorizationUri=https://account.google.com/o/oauth2/auth
+security.oauth2.client.tokenName=oauth_token
+security.oauth2.client.authenticationScheme=query
+security.oauth2.client.clientAuthenticationScheme=form
+# 重点配置：
+# 如果不想被访问 profile，只访问 email ID，可以将 profile 去掉。★
+security.oauth2.client.scope=profile email
+
+security.oauth2.resource.userInfoUri=https://www.googleapis.com/userinfo/v2/me
+security.oauth2.resource.preferTokenInfo=false
+```
+
+上述配置中的 clientId 和 clientSecret 需要自己配置，要用到 Google Cloud ：
+
+Google Search: Google Cloud -> 左上角的三条杠 ( 菜单 ) -> APIs & Services -> Credentials -> OAuth constent screen -> 填写 Application Name 、Scopes for Google APIs -> Save -> Create credentials -> OAuth Client ID -> Web Application -> 填写 Name 、
+
+URL: http://localhost:8080、Redirect link: http://localhost:8080/login -> Create -> 将它给的 Client ID 和 Client Secret 复制到 application.properties 中的对应的地方。
+
+此时还需要一个 Token ：
+
+HomeController.java: 
+
+```java
+@RequestMapping("user")
+// 添加此注解，因为不想返回一个页面，而是返回 JSON 或者 XML 。
+@ResponseBody
+public Principal user(Principal principal) {
+    return principal;
+}
+```
+
+此时访问`localhost:8080/user`，即可获取登录者的一些信息。★

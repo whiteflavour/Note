@@ -453,3 +453,95 @@ Tomcat 关闭时，它将把会话持久到文件系统中，大多数情况可�
 
 ## 第六章、EL
 
+> 不鼓励使用声明、脚本和表达式。★
+
+分为立即执行和延迟执行两种：
+
+1. 立即执行：`${}`
+2. 延迟执行：`#{}`，很少使用，通常不会出现在 JSP 中。★
+
+### 禁止将 #{} 当作延迟执行表达式执行：
+
+web.xml:
+
+```xml
+<jsp-config>
+	<jsp-property-group>
+    	<deferred-syntax-allowed-as-literal>true</deferred-syntax-allowed-as-literal>
+    </jsp-property-group>
+</jsp-config>
+```
+
+或
+
+xxx.jsp:
+
+```jsp
+<%@ page ... deferredSyntaxAllowedAsLiteral="true" %>
+```
+
+### EL 的位置：
+
+不能在 Directive, Decleration, Scriptlet and Expression 中使用。
+
+**原因：**
+
+Directive 等在编译时执行，而 EL 在渲染 JSP 时执行。
+
+**结果：**
+
+EL 被忽略，甚至导致语法错误。★
+
+### EL 语法：
+
+弱类型，不能在 EL 中声明变量、执行赋值语句或者不产生结果的操作。
+
+### EL 的作用：
+
+提供一种创建 JSP 的工具，从而避免在 JSP 中使用 Java 。
+
+### 在 EL 中使用多个表达式：
+
+只有最后一个表达式的值被保留下来。★
+
+### 字面量：
+
+使用单引号和双引号都可以。
+
+### EL 默认数据类型：
+
+与 Java 的不同点：
+
+|                                      |     Java     |  EL   |
+| :----------------------------------- | :----------: | :---: |
+| **默认小数数据类型**                 |    double    | float |
+| **数字进制**                         | 2, 8, 10, 16 |  10   |
+| **是否允许数字中插入下划线进行连接** |      是      |  否   |
+
+### EL 函数：
+
+`${fn:escapeXml(String)}`：在防止跨站脚本 (XSS) 攻击时起重要作用。★
+
+更多函数：http://docs.oracle.com/javaee/5/jstl/1.1/docs/tlddocs/fn/tld-summary.html ，这是 Java EE5 JSTL 1.1 的文档，6 和 7 中没有为 JSTL 1.2 准备轻松可用的 HTML 文档。★
+
+### 字段访问：
+
+#### 访问类成员变量：
+
+1. `${shirt.size}`：需要 Getter and Setter 。
+2. `${shirt["size"]}`：需要 Getter and Setter 。
+3. `${shirt.getSize()}`：不需要 Getter and Setter 。EL 2.1 添加。
+
+#### 访问 Map ：
+
+1. 键：`${map["username"]}`，值：`${map["userId"]}`。
+2. 键：`${map.username}`，值：`${map.userId}`。限制：键名必须是 Java 标识符。
+
+> 谨慎起见，推荐使用第一种。★
+
+#### 访问 List ：
+
+1. `${list[0]}`, `${list[1]}`, `${list[2]}`
+2. `${list["0"]}`, `${list['1']}`, `${list[2]}`
+
+> 推荐使用第一种，第二种可能被误认为 Map 。★
