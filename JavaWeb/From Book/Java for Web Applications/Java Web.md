@@ -545,3 +545,84 @@ EL 被忽略，甚至导致语法错误。★
 2. `${list["0"]}`, `${list['1']}`, `${list[2]}`
 
 > 推荐使用第一种，第二种可能被误认为 Map 。★
+
+### 注释标签：
+
+`<%--@elvariable id="..." type="xxx"--%>`
+
+> 虽然不必须，但是建议使用。★
+
+**原因：**
+
+便于 IDE 进行提示，更重要的是方便日后自己或他人观看，便于维护。★★
+
+---
+
+> 不鼓励在 JSP 中使用 Java 。 ★
+
+## 第七章、JSTL
+
+### 目标：
+
+编写不使用 Java 的 JSP 。（前后端分离？）
+
+---
+
+### Web 容器规范：
+
+> 一定要坚持检查特定 Web 容器的文档，分析它所支持的规范。★
+
+### Java EE 5 的 JSTL 1.1 的 TLD (标签库描述符) 文档：
+
+http://docs.oracle.com/javaee/5/jstl/1.1/docs/tlddocs/ 
+
+### `<c:url>`：
+
+为了获得更大的安全性、灵活性和可迁移性，推荐使用`<c:url>`对所有 JSP 中的 URL 进行编码，除非该 URL 是一个外部 URL 并且不包含任何参数。即使在这样的情况下，使用`<c:url>`仍然是合法的，并且我们鼓励使用`<c:url>`，以防 URL 中包含了需要编码的特殊字符。★★★
+
+### `<c:import>`：
+
+如果使用 varReader 导出 Reader 变量，那么就不可以使用`<c:param>`，并且必须在`<c:import>`标签的嵌套内容中使用 Reader。Reader 变量在结束`</c:import>`标签之后是不可用的（这保证了 JSP 引擎能够正确的关闭 Reader ）。
+
+永远不应该同时使用 var 和 varReader，会导致异常。
+
+### `<c:remove>`：
+
+若不指定 scope ，那么所有作用域中匹配该名称呢该的所有特性都被移除，应该一直使用 scope 特性。★★
+
+### 本地化与国际化：
+
+在 JSP 中替换`<fmt:message>`标签的过程就是应用程序的国际化；创建包含翻译的属性文件的过程就是应用程序的本地化。★★
+
+#### 区别：
+
+首先通过架构进行国际化，然后通过转换进行本地化。★
+
+#### 区域设置代码：
+
+http://www.loc.gov/standards/iso639-2/php/code_list.php
+
+#### 国家代码：
+
+http://www.iso.org/iso/home/standards/country_codes/iso-3166-1_decoding_table.htm
+
+### `<fmt:message>`：
+
+若`<fmt:message>`被替换成了 ?????，这意味着你未能有效指定一个消息键 (key 特性或者标签体中的键)；若某些消息被替换成了`??? <key>??? `，这意味着消息键在资源包中无法找到。★★
+
+### 时区：
+
+IANA官网：http://www.iana.org/time-zones 或者TimeZone Java API 文档。
+
+### `<fmt:formatDate>`和`<fmt:parseDate>`：
+
+value 特性执行结果为 java.util.Date ，不支持 Calendar 或者 Java 8 Date & Time API 类。
+
+### ISO 4217 货币代码：
+
+http://en.wikipedia.org/wiki/ISO_4217
+
+### resources 文件路径：
+
+resources 文件路径中的所有文件都将在编译时复制到`/WEB-INF/classes`目录中。★
+
