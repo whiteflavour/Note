@@ -626,3 +626,81 @@ http://en.wikipedia.org/wiki/ISO_4217
 
 resources 文件路径中的所有文件都将在编译时复制到`/WEB-INF/classes`目录中。★
 
+### SQL 命名空间：
+
+在表示层 (JSP) 执行数据库操作是不鼓励的，应该在业务逻辑层。
+
+### X 命名空间：
+
+与 SQL 标签一样，XML 处理标签库也不推荐使用。现在，越来越多的应用程序都支持 JSON 标准作为 XML 的备用选项，并且几种高效的标签库都可以将对象映射为 JSON 或者 XML，并再映射回对象，这些工具比 XML 标签库更易用，并且可以在业务逻辑层处理数据传输。
+
+### 使用 JSP 标签替换 Java 代码：
+
+使用`<c:out>`：保护应用程序避免 HTML 和 JavaScript 的注入攻击。`escapeXml=true`将转义所有的 XML 保留字符。
+
+> 总是使用`<c:out>`输出字符串变量是一个好习惯，不过，对于值为非字符原生类型的变量（整数、小数等）就不需要转义了。★
+
+> 注：在 IDE 中，@elvariable 必须全部在一行上，这样 IDE 才能识别它。★★
+
+## 第八章、自定义标签和函数库
+
+标签处理器是 javax.servlet.jsp.tagext.Tag 和 javax.servlet.jsp.tagext.SimpleTag 的实现类。
+
+> 签文件必须在 /WEB-INF/tags 中。★
+
+JSP 标签文件可以在应用程序的 /WEB-INF/lib 目录的 JAR 文件中定义，但规则稍有不同。应用程序中的文件必须被添加在 /WEB-INF/tags 目录中，并且可以在 TLD 中声明，或者使用 taglib 指令指向目录，而 JAR 文件中的标签文件必须被添加到 /META-INF/tag 目录中，并且必须在相同 JAR 文件的 /META-INF 目录中的 TLD 中声明。
+
+### JSP 标签库 XSD ：
+
+> JSP 标签库 XSD 注意事项：模式使用了严格的元素顺序，否则该 TLD 文件将无效。★
+
+### 验证器：
+
+验证器继承了 javax.servlet.jsp.tagext.TagLibraryValidator 类。
+
+> 验证器的实现比较困难，我们几乎不需要使用它，并且它极其复杂。★
+
+### 监听器：
+
+在 TLD 中声明监听器非常少见。★
+
+### 定义标签：
+
+javax.servlet.jsp.tagext.TagExtraInfo 类可以在转换时验证标签中使用的特性，从而保证它们的使用是正确的。
+
+它并不常见。★
+
+### 标签扩展：
+
+并不常见且复杂。★
+
+### 定义标签文件：
+
+标签文件事实上是一种 JSP 文件。
+
+> 注：JAR 库中的标签文件必须定义在 TLD 中；若希望将一个或多个标签文件（包含了一个或多个标签处理器或者 JSP 函数）分配到相同的命名空间中，那么需要在 TLD 中定义这些标签，即使它们不再 JAR 文件中。★
+
+在 TLD 的所有`<tag>`元素之后，可以添加`<tag-file>`元素，其中，`<path>`元素的值必须以 Web 应用程序的 /WEB-INF/tags 路径开头，或者以 JAR 文件的 /META-INF/tags 路径开头。
+
+### 定义函数：
+
+若`<function>`中包含了 XML 语言中的保留字符 (`&lt;`、`&nbsp;`等) ，则你总是应该在 CDATA 块 (`<![CDATA[special content goes here ]]>`) 中添加这样的内容，否则那些非常严格的 XML 验证器可能将这种情况标志为问题。★★
+
+### 标签文件指令：
+
+标签文件可以使用 include 和 taglib 指令，但不能使用 page ，而使用 tag 指令来替换 page 的必要功能。★
+
+> 标签名总是与标签文件名相同 (去掉 .tag 扩展名) 。
+
+### 标签文件最强大的特性：
+
+为应用程序创建 HTML 模板系统。
+
+该模板系统可以处理许多跨应用程序多个页面的重复任务，减少重复代码并使网站的设计易于修改。
+
+### Java 8 日期和时间 API ：
+
+有一个通用的接口：`java.time.temporal.TemporalAccessor`。
+
+## 第九章、过滤器
+

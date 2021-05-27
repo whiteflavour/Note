@@ -155,3 +155,44 @@ JUnit：expected, actual
 
 ### 13. Test Doubles Overview
 
+#### Java has many test double frameworks: 
+
+1. EasyMock：在老 Project 中可能会看到。
+2. Mockito：最常用。★
+3. PowerMock: 有除上述两者之外的更多功能。
+4. ...
+
+#### 优点：
+
+帮助你在有很多依赖类的情况下不进行太多改动即可测试代码。如：若需要访问外部资源（一个网站、数据库。。。），但实际我们在测试的时候不想去真正访问它们，因为需要消耗一些时间，但是 Mock 可以帮助我们。
+
+#### Creating a Mock: 
+
+1. Create the mock object
+2. Set expectations for the mock object
+3. Inject the mock into the test object
+4. Invoke the test object
+5. Verify
+
+通用的步骤是 1, 2 和 5，其他两步根据使用的测试框架不同而不同。★
+
+### 14. EasyMock
+
+断网也能用。
+
+### 15. Mockito
+
+在 Java 开发中比较常见，是 EasyMock 的一种分支，所以都差不多。
+
+但是它比 EasyMock 简单，并且有更多特性。★
+
+一般 Mockito 不会抛出 NullPointerException ，默认返回空字符串、空 List 等等。
+
+### 16. PowerMock
+
+在使用第三方库的时候有些不是 Static Method ，可能需要用到 PowerMock 来测试。
+
+Spring Framework 就有一些 Mock 测试类，来方便单元测试，就不需要使用第三方库了。
+
+## 4. Logging
+
