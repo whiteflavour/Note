@@ -704,3 +704,30 @@ javax.servlet.jsp.tagext.TagExtraInfo 类可以在转换时验证标签中使用
 
 ## 第九章、过滤器
 
+Servlet API 规范目前尚未支持除 HTTP 以外的协议。★★★
+
+### 与 Servlet 的区别：
+
+过滤器不可以在第一个请求到达时加载，其`init()`方法总是在应用程序启动时调用。
+
+### 使用部署描述符配置 Filter：
+
+过滤器 URL 映射可以包含通配符 (*) 。★★
+
+### 使用注解配置：
+
+**缺点：**不能对过滤器链上的过滤器进行排序。★★★
+
+### 使用编程式配置：
+
+通常需要在 ServletContextListener 的`contextInitialized()`方法中实现（也可以在 SevletContainerInitializer 的`onStartup()`方法中添加过滤器。）
+
+FilterRegistration.Dynamic 的`addMappingForUrlPatterns()`方法的第二个参数，若为 false ，则编程式的过滤器在部署描述符的过滤器之前加载并排序；若为 true，则先加载部署描述符中的映射。★
+
+### 排序：
+
+URL 映射的过滤器优先级比 Servlet 名称映射的过滤器高。★★★
+
+### 处理异步请求：
+
+大多情况下都不需要使用异步请求处理。★
