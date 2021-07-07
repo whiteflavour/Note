@@ -34,3 +34,44 @@ EJB 太笨重，所以就有了灵活的 Spring 。但具体使用什么还是�
    （优点：除构造方法的缺点对应的部分外，还有良好的 IDE 支持。缺点：对象无法在构造完成之后立马进入就绪状态。）
 3. 接口注入：必须实现某个接口，比较死板和烦琐。
    （不提倡使用，因为它强制对象实现不必要的接口，带有侵入性）
+
+## 第四章、BeanFactory
+
+BeanFactory 是最基本的容器，而 ApplicationContext 有更多的功能。
+
+xml 文件的 XSD 格式是较于 DTD 之后出新的，推荐使用。★
+
+### BeanFactory 的使用：
+
+```java
+DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+reader.loadBeanDefinitions(new FileSystemResource("beans.xml"));
+
+factory.getBean("...");
+```
+
+### 对一个字符串注入 null：
+
+使用`<null/>`。
+
+### `<bean/>`配置的自动绑定：
+
+**注：**★
+
+1. 手工明确指定的绑定关系总会覆盖自动绑定的行为。
+2. 自动绑定只适用于“原生类型、String 以及Classes类型以外“的对象类型，对这些类型及其它们的数组无法自动绑定。
+
+建议手动绑定，因为有良好的 IDE 支持，通常不介意多敲那几个字符，并且有助于自己把握系统的行为。当然，任何事都不是绝对的，找到对于该场景合适的即可。
+
+**技巧：**
+
+可以在`<beans/>`标签中指定一些属性，它们会直接运用于所有的`<bean/>`。★
+
+### 继承：
+
+可以在`<bean/>`中指定 parent 属性，甚至还可以指定 abstract ，避免容器对其实例化，特别是 ApplicationContext 。
+
+### scope 属性中的 singleton and prototype：
+
+singleton 与单例设计模式不同：singleton 保证这种类型的 bean 在同一个容器中只存在一个共享实例；而 Singleton 设计模式则是保证在同一个 ClassLoader 中只存在一个这种类型的实例。

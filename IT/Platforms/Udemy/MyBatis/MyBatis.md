@@ -1,4 +1,4 @@
-# MyBatis
+# MyBatis (2021-6-6 ~ 2021-6-30)
 
 ## 一、入门：
 
@@ -708,7 +708,7 @@ try (SqlSession session = sqlSessionFactory.openSession()) {
 }
 ```
 
-### 24. 关系查询-一对一查询（JavaBean）
+### 24. 关系查询-一对一查询（JavaBean）（常用 - 相对于 ResultMap 来说）
 
 StudentMapper.xml:
 
@@ -758,3 +758,147 @@ public class Result extends FruitShopOrder {
 
 ### 25. 一对一查询（ResultMap）：
 
+StudentMapper.xml:
+
+```xml
+<select id="selectStuAndOrderResultMap" resultMap="fruitShopOrder">
+    select stuId, name, age, price, datetime
+    from student
+        right join fruit_shop_order on student.id = fruit_shop_order.stuId;
+</select>
+
+<resultMap id="fruitShopOrder" type="FruitShopOrder">
+    <result column="stuId" property="stuId"/>
+    <result column="price" property="price"/>
+    <result column="datetime" property="datetime"/>
+    <association property="student" javaType="Student">
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+    </association>
+</resultMap>
+```
+
+FruitShopOrder.java:
+
+```java
+public class FruitShopOrder {
+    // other fields ...
+    private Student student;
+    
+    // getter and setter ...
+}
+```
+
+DynamicSqlTest.java:
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+    StudentMapper mapper = session.getMapper(StudentMapper.class);
+    List<FruitShopOrder> results = mapper.selectStuAndOrderResultMap();
+    for (FruitShopOrder result : results) {
+        System.out.println("id: " + result.getStuId() + ", name: "
+                + result.getStudent().getName() + ", price: "
+                + result.getPrice() + ", datetime: "
+                + result.getDatetime());
+    }
+}
+```
+
+### 26. 关系查询 - 一对多查询：
+
+StudentMapper.xml:
+
+```xml
+<select id="selectOrders" resultMap="stuOrders">
+    select fruit_shop_order.id as order_id, name, age, price, datetime
+    from fruit_shop_order
+        left join student on student.id = stuId;
+</select>
+
+<resultMap id="stuOrders" type="Student">
+    <result column="name" property="name"/>
+    <result column="age" property="age"/>
+    <collection property="orders" javaType="FruitShopOrder">
+        <id column="order_id" property="id"/>
+        <result column="price" property="price"/>
+        <result column="datetime" property="datetime"/>
+    </collection>
+</resultMap>
+```
+
+Student.java:
+
+```java
+public class Student {
+    // other fileds...
+    private List<FruitShopOrder> orders = new ArrayList<>();    
+    
+    // getter and setter...
+}
+```
+
+DynamicSqlTest.java:
+
+```java
+try (SqlSession session = sqlSessionFactory.openSession()) {
+    StudentMapper mapper = session.getMapper(StudentMapper.class);
+    List<Student> students = mapper.selectOrders();
+    for (Student student : students) {
+        System.out.println("用户信息：");
+        System.out.println("name: " + student.getName() + ", age: " + student.getAge());
+        System.out.println("订单信息：");
+        for (FruitShopOrder order : student.getOrders()) {
+            System.out.println("order id: " + order.getId()
+                    + ", price: " + order.getPrice()
+                    + ", datetime: " + order.getDatetime());
+        }
+        System.out.println();
+    }
+}
+```
+
+### 27. MyBatis 逆向工程的使用：
+
+generatorConfig.xml:
+
+```xml
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <context id="simple" targetRuntime="MyBatis3Simple">
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/mybatis?characterEncoding=UTF-8&amp;serverTimezone=Asia/Shanghai"
+                        userId="root"
+                        password="123456"/>
+
+        <javaModelGenerator targetPackage="com.google.model" targetProject="src/main/java"/>
+
+        <sqlMapGenerator targetPackage="com.google.mapper" targetProject="src/main/resources"/>
+
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.google.mapper" targetProject="src/main/java"/>
+
+        <table tableName="student" />
+        <table tableName="fruit_shop_order" />
+    </context>
+</generatorConfiguration>
+```
+
+CodeGenerator.java:
+
+```java
+public class CodeGenerator {
+    public void generate() throws IOException, XMLParserException, InvalidConfigurationException, SQLException, InterruptedException {
+        List<String> warnings = new ArrayList<>();
+        boolean overwrite = true;
+        File configFile = new File("F:\\Code\\Java\\MyBatis\\Udemy\\神马学堂小风\\MyBatisGenerator\\src\\main\\resources\\generatorConfig.xml");
+        ConfigurationParser cp = new ConfigurationParser(warnings);
+        Configuration config = cp.parseConfiguration(configFile);
+        DefaultShellCallback callback = new DefaultShellCallback(overwrite);
+        MyBatisGenerator myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
+        myBatisGenerator.generate(null);
+    }
+}
+```
+
+生成一系列文件之后，再像使用 MyBatis 这样使用他们即可。★
