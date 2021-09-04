@@ -75,3 +75,23 @@ factory.getBean("...");
 ### scope 属性中的 singleton and prototype：
 
 singleton 与单例设计模式不同：singleton 保证这种类型的 bean 在同一个容器中只存在一个共享实例；而 Singleton 设计模式则是保证在同一个 ClassLoader 中只存在一个这种类型的实例。
+
+prototype 的 bean，容器每次返回给请求方一个新的对象实例后，就任由它自生自灭了。
+
+**自定义 scpoe ：**
+
+实现 Scope 接口，get() 和 remove() 必须实现。
+
+通常情况下，使用 ConfigurableBeanFactory 的 registerScope() 方法注册自定义 scope 。
+
+### FactoryBean：
+
+容器返回的是 FactoryBean 所生产的类型，而不是 FactoryBean 本身，若要取得其本身，在 bean 定义的 id 之前加 & 。
+
+### Spring 容器较为独特的功能特性：
+
+1. 方法注入。
+2. 方法替换。
+
+## 第五章、
+

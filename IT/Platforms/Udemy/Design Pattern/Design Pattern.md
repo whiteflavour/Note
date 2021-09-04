@@ -79,10 +79,10 @@ public class SquareBalloon implements ScoreBoardBase {
 }
 ```
 
-StrategyTest.java:
+Example1Test.java:
 
 ```java
-public class StrategyTest {
+public class Example1Test {
     @Test
     public void testScore() {
         ScoreBoard score;
@@ -100,5 +100,116 @@ public class StrategyTest {
 
 ![Example2](F:\Note\IT\Platforms\Udemy\Design Pattern\Pictures\Strategy Pattern\Payment System.png)
 
+Payment.java:
 
+```java
+public interface Payment {
+    void pay(String name, double amount);
+}
+```
+
+ShoppingCart.java:
+
+```java
+public class ShoppingCart {
+    private List<Product> products = new ArrayList<>();
+
+    public void addProduct(Product product) {
+        products.add(product);
+    }
+
+    public void removeProduct(Product product) {
+        products.remove(product);
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
+    }
+}
+```
+
+Product.java:
+
+```java
+public class Product {
+    private String name;
+    private double price;
+
+    public Product(String name, double price) {
+        this.name = name;
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void pay(Payment payment) {
+        payment.pay(name, price);
+    }
+}
+```
+
+PaypalPayment.java:
+
+```java
+public class PaypalPayment implements Payment {
+    @Override
+    public void pay(String name, double amount) {
+        System.out.println("paid with paypal: " + name + ", " + amount + "$");
+    }
+}
+```
+
+CreditCardPayment.java:
+
+```java
+public class CreditCardPayment implements Payment {
+    @Override
+    public void pay(String name, double amount) {
+        System.out.println("paid with credit card: " + name + ", " + amount + "$");
+    }
+}
+```
+
+Example2Test.java:
+
+```java
+public class Example2Test {
+    @Test
+    public void testPayment() {
+        ShoppingCart shoppingCart = new ShoppingCart();
+        shoppingCart.addProduct(new Product("MacBook pro", 1999));
+        shoppingCart.addProduct(new Product("Google Pixel", 999));
+        for (Product product : shoppingCart.getProducts()) {
+            product.pay(new PaypalPayment());
+            product.pay(new CreditCardPayment());
+        }
+    }
+}
+```
+
+## Observer Design Pattern
+
+### 5. Intorduction
+
+现实中很常用。
+
+一个总的 Object 与其他 Subscribers (Listener) 建立依赖，一旦这个 Object 发生改变，它的 Subscribers 也自动被通知和发生改变。如：订阅邮箱、电视机或手机接收卫星信号等。
+
+![ObserverPattern](F:\Note\IT\Platforms\Udemy\Design Pattern\Pictures\Observer Pattern\ObserverPattern.png)
+
+wiki:
+
+![Observer Pattern From Wiki](F:\Note\IT\Platforms\Udemy\Design Pattern\Pictures\Observer Pattern\Observer Pattern From Wiki.png)
+
+### 6. Coding
 

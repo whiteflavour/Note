@@ -1,0 +1,1 @@
+部署 Tomcat 的时候选择 war ，而非 war (exploded) 。
