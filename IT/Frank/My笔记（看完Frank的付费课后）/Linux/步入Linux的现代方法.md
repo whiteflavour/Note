@@ -1883,10 +1883,17 @@ $HOME 目录创建一个 .vimrc 文件，编辑它，保存后`source .vimrc`：
 set syntax=on // 语法高亮
 set tabstop=4 // 统一要求的, tab 的距离
 set softtabstop=4
+set shiftwidth=4 // 更改缩进方式
 set number // 行号
 set enc=utf-8
 // set langmenu=zh 设置中文，这里就不设置的，设个屁的中文
 set showmatch // 括号匹配
+```
+
+> .vimrc 注释：在左侧输入一个双引号。如：
+
+```
+" this is a comment
 ```
 
 可以从 github 或者网站上搜索程序员经典必备的配置。★
