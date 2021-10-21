@@ -1025,3 +1025,158 @@ public class You {
 
 ## Template Pattern:
 
+### Introduction:
+
+定义模板，很好理解，跟 C++ 中的 Template 和 Java 的 interface 有点类似的感觉。
+
+### Code：
+
+Game.java:
+
+```java
+public abstract class Game {
+    abstract void initialize();
+    abstract void startPlay();
+    abstract void endPlay();
+
+    public final void play() {
+        initialize();
+        startPlay();
+        endPlay();
+    }
+}
+```
+
+Cricket.java:
+
+```java
+public class Cricket extends Game {
+    @Override
+    void initialize() {
+        System.out.println("Initializing cricket game...");
+    }
+
+    @Override
+    void startPlay() {
+        System.out.println("Starting cricket game ...");
+    }
+
+    @Override
+    void endPlay() {
+        System.out.println("Ending cricket game...");
+    }
+}
+```
+
+Football.java:
+
+```java
+public class FootballGame extends Game {
+    @Override
+    void initialize() {
+        System.out.println("Initializing football game...");
+    }
+
+    @Override
+    void startPlay() {
+        System.out.println("Starting football game ...");
+    }
+
+    @Override
+    void endPlay() {
+        System.out.println("Ending football game...");
+    }
+}
+```
+
+GameTest.java:
+
+```java
+public class GameTest {
+    @Test
+    public void testGame() {
+        Game football = new FootballGame();
+        football.play();
+        System.out.println();
+        Game cricket = new Cricket();
+        cricket.play();
+    }
+}
+```
+
+## Iterator Pattern:
+
+### Introduction:
+
+若没有迭代器，我们需要对不同的对象（如：ArrayList 和 普通的数组 ）都使用 for 循环。for 循环内其内容是大致相同的，这就导致代码可读性下降。
+
+![Iterator Pattern](F:\Note\IT\Platforms\Udemy\Design Pattern\Pictures\Iterator Pattern\Iterator Pattern.png)
+
+### Code:
+
+Container.java:
+
+```java
+public interface Container {
+    Iterator getIterator();
+}
+```
+
+Iterator.java:
+
+```java
+public interface Iterator {
+    boolean hasNext();
+    Object next();
+}
+```
+
+NameRepository.java:
+
+```java
+public class NameRepository implements Container {
+    public String[] names = {"Tom", "Jack", "Rose", "Jerry"};
+
+    @Override
+    public Iterator getIterator() {
+        return new NameRepositoryIterator();
+    }
+
+    private class NameRepositoryIterator implements Iterator {
+        private int index;
+
+        @Override
+        public boolean hasNext() {
+            return index < names.length;
+        }
+
+        @Override
+        public Object next() {
+            if (this.hasNext()) {
+                return names[index++];
+            }
+            return null;
+        }
+    }
+}
+```
+
+IteratorPatternTest.java:
+
+```java
+public class IteratorPatternTest {
+    @Test
+    public void testIteratorPattern() {
+        NameRepository nameRepository = new NameRepository();
+        Iterator iterator = nameRepository.getIterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
+        }
+    }
+}
+```
+
+From: https://www.tutorialspoint.com/design_pattern/iterator_pattern.htm （发现菜鸟教程是抄的这个网站，哈哈，应该把，不知道是谁抄谁）
+
+## State Pattern:
+
