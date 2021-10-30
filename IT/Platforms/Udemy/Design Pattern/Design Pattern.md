@@ -1180,3 +1180,155 @@ From: https://www.tutorialspoint.com/design_pattern/iterator_pattern.htm （发�
 
 ## State Pattern:
 
+### Introduction:
+
+能在各个状态 (State) 之间进行转换，并且进行封装。
+
+![State Pattern From Wiki](/Users/fuck/Documents/Note/IT/Platforms/Udemy/Design Pattern/Pictures/State Pattern/State Pattern From Wiki.png)
+
+### Code: (From Wiki)
+
+State.java:
+
+```java
+public interface State {
+    void writeName(String name, StateContext context);
+}
+```
+
+LowerCaseState.java:
+
+```java
+public class LowerCaseState implements State {
+    @Override
+    public void writeName(String name, StateContext context) {
+        System.out.println(name.toLowerCase());
+        context.setState(new MultipleUpperCaseState());
+    }
+}
+```
+
+MultipleUpperCaseState.java:
+
+```java
+public class MultipleUpperCaseState implements State {
+    private int counter = 0;
+
+    @Override
+    public void writeName(String name, StateContext context) {
+        System.out.println(name.toUpperCase());
+        if (++counter > 1) {
+            context.setState(new LowerCaseState());
+        }
+    }
+}
+```
+
+StateContext.java:
+
+```java
+public class StateContext {
+    private State state;
+
+    public StateContext() {
+        state = new LowerCaseState();
+    }
+
+    public void setState(State state) {
+        this.state = state;
+    }
+
+    public void writeName(String name) {
+        state.writeName(name, this);
+    }
+}
+```
+
+StatePatternTest.java:
+
+```java
+public class StatePatternTest {
+    @Test
+    public void testStatePattern() {
+        StateContext context = new StateContext();
+        context.writeName("Monday");
+        context.writeName("Tuesday");
+        context.writeName("Wednesday");
+        context.writeName("Thursday");
+        context.writeName("Friday");
+        context.writeName("Saturday");
+        context.writeName("Sunday");
+    }
+}
+```
+
+## Proxy Pattern
+
+### Introduction:
+
+请求一个中间人(middleman)，代替我们去访问。（如：我们取钱本来要直接去银行，但是有了信用卡，我们就可以通过 ATM 机取钱，代替我们向银行访问。
+
+### 三种 Proxy：
+
+1. 代理访问远程目标 -> Remote Proxy
+2. 访问复杂目标（不好创建）-> Virtural Proxy
+3. 安全 -> Protection Proxy
+
+![ProxyPattern](/Users/fuck/Documents/Note/IT/Platforms/Udemy/Design Pattern/Pictures/Proxy Pattern/ProxyPattern.png)
+
+### Code:
+
+Bank.java:
+
+```java
+public interface Bank {
+    void withdrawMoney();
+}
+```
+
+ProxyBank.java:
+
+```java
+public class ProxyBank implements Bank {
+    private Bank bank;
+
+    public ProxyBank() {
+        bank = new RealBank();
+    }
+
+    @Override
+    public void withdrawMoney() {
+        System.out.println("Withdraw money from ATM...");
+        bank.withdrawMoney();
+    }
+}
+```
+
+RealBank.java:
+
+```java
+public class RealBank implements Bank {
+    @Override
+    public void withdrawMoney() {
+        System.out.println("Withdraw money from real bank...");
+    }
+}
+```
+
+ProxyPatternTest.java:
+
+```java
+public class ProxyPatternTest {
+    @Test
+    public void testProxyBank() {
+        Bank proxyBank = new ProxyBank();
+        proxyBank.withdrawMoney();
+        System.out.println();
+        Bank realBank = new RealBank();
+        realBank.withdrawMoney();
+    }
+}
+```
+
+## MVC Pattern:
+
