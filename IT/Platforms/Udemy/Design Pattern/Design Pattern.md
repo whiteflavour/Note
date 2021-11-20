@@ -1332,3 +1332,106 @@ public class ProxyPatternTest {
 
 ## MVC Pattern:
 
+### Introduction:
+
+在 MVC Pattern 中也可能使用其他的设计模式，这些设计模式并不是独立的，而是跟据使用场景配合使用的。
+
+### Code：
+
+Student.java:
+
+```java
+public class Student {
+    private String rollNo;
+    private String name;
+
+    public Student(String rollNo, String name) {
+        this.rollNo = rollNo;
+        this.name = name;
+    }
+
+    public String getRollNo() {
+        return rollNo;
+    }
+
+    public void setRollNo(String rollNo) {
+        this.rollNo = rollNo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+StudentView.java:
+
+```java
+public class StudentView {
+    public void printStudentDetails(Student student) {
+        System.out.println("Roll NO: " + student.getRollNo());
+        System.out.println("Name: " + student.getName());
+    }
+}
+```
+
+StudentController.java:
+
+```java
+public class StudentController {
+    private Student student;
+    private StudentView studentView;
+
+    public StudentController(Student student, StudentView studentView) {
+        this.student = student;
+        this.studentView = studentView;
+    }
+
+    public String getStudentName() {
+        return student.getName();
+    }
+
+    public void setStudentName(String name) {
+        student.setName(name);
+    }
+
+    public String getStudentRollNo() {
+        return student.getRollNo();
+    }
+
+    public void setStudentRollNo(String rollNo) {
+        student.setRollNo(rollNo);
+    }
+
+    public void updateView() {
+        studentView.printStudentDetails(student);
+    }
+}
+```
+
+MVCPattern.java:
+
+```java
+public class MVCPatternDemo {
+    public static void main(String[] args) {
+        Student model = retrieveStudentFromDatabase();
+        StudentView view = new StudentView();
+        StudentController controller = new StudentController(model, view);
+
+        controller.updateView();
+        controller.setStudentName("Tom");
+        controller.updateView();
+    }
+
+    public static Student retrieveStudentFromDatabase() {
+        return new Student("1", "Rose");
+    }
+}
+```
+
+## Builder Pattern:
+
