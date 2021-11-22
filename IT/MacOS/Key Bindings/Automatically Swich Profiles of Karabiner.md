@@ -2,7 +2,7 @@
 
 ## Karabiner 切换 Profile 的原理：
 
-只要将`/Users/'whoami'/.config/karabiner/karabiner.json`文件中的 profiles 下的 name 的内容修改为对应的 Profile 名即可切换。
+只要将`/Users/'whoami'/.config/karabiner/karabiner.json`文件中的 profiles 下的 name 的内容修改为对应的 Profile 名即可切换。★
 
 ## 实现：
 
@@ -43,7 +43,9 @@ From: https://github.com/xbot/shell/blob/master/karabiner-elements-profile-switc
 
 ### Keyboard Maestro 创建宏：
 
-![Keyboard Maestros](/Users/fuck/Documents/Note/IT/MacOS/Keyboard Maestro.png)
+切换 Profile 为 `Default`：
+
+![Keyboard Maestros](/Users/fuck/Documents/Note/IT/MacOS/Key Bindings/Keyboard Maestro.png)
 
 From：https://invisprints.wordpress.com/2017/12/10/autochangekeyonmacos/
 
