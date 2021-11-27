@@ -1435,3 +1435,184 @@ public class MVCPatternDemo {
 
 ## Builder Pattern:
 
+### Introduction:
+
+我们可以像平时那样使用 Constructor 来构造对象，但是如果对象的属性比饺多，就很混乱，于是我们可以使用 Builder Pattern，使用之后，我们就可以一步一步来构造对象，填充对象的属性，就像 JDK 中的 StringBuilder 一样。
+
+JDK 中的 StringBuilder 就使用了 Builder Pattern:
+
+```java
+StringBuilder sb = new StringBuilder();
+
+sb.append().append();
+	.append();
+
+...
+```
+
+### Code：
+
+我们可以直接在对象类中使用内部类来进行，更好的方式是将其封装在 Interface 中。★
+
+From wiki and Paulo Dichone in Udemy:
+
+Pizza.java:
+
+```java
+/**
+ * Product
+ */
+public class Pizza {
+    private String dough;
+    private String sauce;
+    private String topping;
+
+    public void setDough(String dough) {
+        this.dough = dough;
+    }
+
+    public void setSauce(String sauce) {
+        this.sauce = sauce;
+    }
+
+    public void setTopping(String topping) {
+        this.topping = topping;
+    }
+
+    @Override
+    public String toString() {
+        return "Pizza{" +
+                "dough='" + dough + '\'' +
+                ", sauce='" + sauce + '\'' +
+                ", topping='" + topping + '\'' +
+                '}';
+    }
+}
+```
+
+PizzaBuilder.java:
+
+```java
+/**
+ * Abstract Builder
+ */
+public abstract class PizzaBuilder {
+    private Pizza pizza;
+
+    public Pizza getPizza() {
+        return pizza;
+    }
+
+    public PizzaBuilder createNewPizzaProduct() {
+        pizza = new Pizza();
+        return this;
+    }
+
+    public abstract PizzaBuilder buildDough();
+    public abstract PizzaBuilder buildSauce();
+    public abstract PizzaBuilder buildTopping();
+}
+```
+
+HawaiianPizzaBuilder.java:
+
+```java
+/**
+ * Concrete Builder
+ */
+public class HawaiianPizzaBuilder extends PizzaBuilder {
+    @Override
+    public PizzaBuilder buildDough() {
+        getPizza().setDough("cross");
+        return this;
+    }
+
+    @Override
+    public PizzaBuilder buildSauce() {
+        getPizza().setSauce("mild");
+        return this;
+    }
+
+    @Override
+    public PizzaBuilder buildTopping() {
+        getPizza().setTopping("ham + pineapple");
+        return this;
+    }
+}
+```
+
+SpicyPizzaBuilder.java:
+
+```java
+/**
+ * Concrete Builder
+ */
+public class SpicyPizzaBuilder extends PizzaBuilder {
+    @Override
+    public PizzaBuilder buildDough() {
+        getPizza().setDough("pan baked");
+
+        // 这样就可以使用链式调用
+        return this;
+    }
+
+    @Override
+    public PizzaBuilder buildSauce() {
+        getPizza().setSauce("hot");
+        return this;
+    }
+
+    @Override
+    public PizzaBuilder buildTopping() {
+        getPizza().setTopping("pepperoni + salami");
+        return this;
+    }
+}
+```
+
+Waiter.java:
+
+```java
+/**
+ * Director
+ */
+public class Waiter {
+    private PizzaBuilder pizzaBuilder;
+
+    public void setPizzaBuilder(PizzaBuilder pizzaBuilder) {
+        this.pizzaBuilder = pizzaBuilder;
+    }
+
+    public Pizza getPizza() {
+        return pizzaBuilder.getPizza();
+    }
+
+    public void constructPizza() {
+        pizzaBuilder.createNewPizzaProduct()
+                    .buildSauce()
+                    .buildDough()
+                    .buildTopping();
+    }
+}
+```
+
+OrderingPizza.java:
+
+```java
+public class OrderingPizza {
+    public static void main(String[] args) {
+        PizzaBuilder hawaiianPizzaBuilder = new HawaiianPizzaBuilder();
+        PizzaBuilder spicyPizzaBuilder = new SpicyPizzaBuilder();
+
+        Waiter waiter = new Waiter();
+        waiter.setPizzaBuilder(spicyPizzaBuilder);
+        waiter.constructPizza();
+
+        Pizza pizza = waiter.getPizza();
+        System.out.println(pizza);
+    }
+}
+```
+
+## Prototype Pattern:
+
