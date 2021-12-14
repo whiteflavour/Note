@@ -52,3 +52,6 @@ From：https://invisprints.wordpress.com/2017/12/10/autochangekeyonmacos/
 > 现在终于可以通过 Rime、karabiner Elements 和 Keyboard Maestro 来在任何情况下都使用 Emacs、终端快捷键了，自定义 YYDS。
 
 相应的 Rime、Karabiner Elements 关键配置文件和 自动切换 Profile 脚本已经上传 GitHub 了。★
+
+> 注：更新 macOS Monterey 之后内置的 PHP 没了，所以要重新安装 PHP，其默认路径在`/usr/local/bin/php`；并且根据 Keyboard Maestro 的官方文档，KM 执行 Shell Script 的时候默认路径为`/usr/bin:/bin:/usr/sbin:/sbin`，没有重新安装 PHP 后的路径，所以在 KM 执行 php 命令时要使用**绝对路径**。（更新系统后花了好几个小时都没解决，还有个重大原因是单词拼写问题，switch 这个单词。。。）★★★
+
