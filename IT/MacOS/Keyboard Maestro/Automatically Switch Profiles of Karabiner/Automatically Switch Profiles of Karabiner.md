@@ -53,5 +53,26 @@ From：https://invisprints.wordpress.com/2017/12/10/autochangekeyonmacos/
 
 相应的 Rime、Karabiner Elements 关键配置文件和 自动切换 Profile 脚本已经上传 GitHub 了。★
 
-> 注：更新 macOS Monterey 之后内置的 PHP 没了，所以要重新安装 PHP，其默认路径在`/usr/local/bin/php`；并且根据 Keyboard Maestro 的官方文档，KM 执行 Shell Script 的时候默认路径为`/usr/bin:/bin:/usr/sbin:/sbin`，没有重新安装 PHP 后的路径，所以在 KM 执行 php 命令时要使用**绝对路径**。（更新系统后花了好几个小时都没解决，还有个重大原因是单词拼写问题，switch 这个单词。。。）★★★
+## 更新 MacOS Monterey 后 KM 报错：“text-script：php：command not found” 问题解决：
+
+### 原因：
+
+KM 找不到 php 命令的路径：
+
+更新 macOS Monterey 之后内置的 PHP 没了，所以要重新安装 PHP，其默认路径在`/usr/local/bin/php`；并且根据 Keyboard Maestro 的**官方文档*，KM 执行 Shell Script 的时候默认路径为`/usr/bin:/bin:/usr/sbin:/sbin`，没有重新安装 PHP 后的路径。
+
+### 解决：
+
+在 KM 中使用**绝对路径**执行 php 命令：`/usr/local/bin/php /Users/fuck/.config/karabiner/profile-switcher.php "Terminal"`。
+
+### 感想：
+
+更新系统后花了好几个小时都没解决：
+
+1. 知识量不足，但前几天根据经验还是知道可能时路径问题，试过之后不行，没有把握，于是猜想可能是软件 Bug，但是据系统出来这么久，都还没修复，也不可能没人发现，所以暂时放弃了这个念头
+2. 后来发现是单词拼写问题，switch 这个单词拼成了 swich，惹太多坑。。。
+
+### 总结：
+
+这个问题告诉我们：好好看**文档**总是没错的，有些问题在文档里就能知道答案。（印证了耗子叔的观点的正确性：先大致看看文档，掌握其脉络，后面遇到问题有个印象，方便查询答案。）★★
 
