@@ -1616,3 +1616,167 @@ public class OrderingPizza {
 
 ## Prototype Pattern:
 
+### Introduction:
+
+克隆对象。
+
+### Code:
+
+**注：**
+
+方法1和2的主要区别就是实现类的`clone()`方法。
+
+#### 1. 不使用`Cloneable`接口：
+
+Prototype.java:
+
+```java
+public interface Prototype {
+    Prototype clone();
+}
+```
+
+Person.java:
+
+```java
+public class Person implements Prototype {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public Prototype clone() {
+        return new Person(name, age);
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+```
+
+Dolphin.java:
+
+```java
+public class Dolphin implements Prototype {
+    private String name;
+    private int age;
+
+    public Dolphin(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    @Override
+    public Prototype clone() {
+        return new Dolphin(name, age);
+    }
+
+    @Override
+    public String toString() {
+        return "Dolphin{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+```
+
+CloneTest.java:
+
+```java
+public class CloneTest {
+    @Test
+    public void testClone() {
+        Person bonni = new Person("bonni", 21);
+        System.out.println("Person 1: " + bonni);
+
+        Person nina = (Person) bonni.clone();
+        nina.setName("Nina");
+        System.out.println("Person 2: " + nina);
+
+        Dolphin jerry = new Dolphin("jerry", 78);
+        System.out.println("Dolphin 1: " + jerry);
+
+        Dolphin sam = (Dolphin) jerry.clone();
+        System.out.println("Dolphin 2: " + sam);
+    }
+}
+```
+
+#### 2. 使用`Cloneable`接口：
+
+Animal.java:
+
+```java
+public interface Animal extends Cloneable {
+    Animal clone();
+}
+```
+
+Person.java:
+
+```java
+public class Person implements Animal {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+        System.out.println("Person is created ...");
+    }
+
+    @Override
+    public Animal clone() {
+        System.out.println("Creating person ...");
+        Person person = null;
+        try {
+            person = (Person) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return person;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                '}';
+    }
+}
+```
+
+Run.java:
+
+```java
+public class Run {
+    public static void main(String[] args) {
+        Person person = new Person("james", 45);
+        System.out.println("Person 1: " + person);
+
+        Person secondPerson = (Person) person.clone();
+        System.out.println("Person copy: " + secondPerson);
+
+        System.out.println(System.identityHashCode(person) + "\n"
+            + System.identityHashCode(secondPerson));
+    }
+}
+```
+
+## Mediator Pattern:
+
