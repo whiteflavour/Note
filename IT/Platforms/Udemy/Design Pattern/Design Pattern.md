@@ -1778,5 +1778,116 @@ public class Run {
 }
 ```
 
-## Mediator Pattern:
+## Mediator Pattern (中介者模式):
+
+### Introduction:
+
+把复杂的信息集中控制。
+
+就像飞机航线一样，每个飞行员不知道其他飞机的航线（什么时候起飞、哪里停止。。），但是通过总控制系统（指挥中心），就只需要指到自己什么时候起飞、哪里停止即可，简化了飞行员的工作。我们只需要在一个地方即可掌握所有的航班信息。
+
+感觉就跟星链一代的激光通讯一样，哈哈哈。。
+
+Java 中的`Timer`和`多线程`的某些JDK库用到了该设计模式。
+
+### Code:
+
+ATCMediator.java:
+
+```java
+public interface ATCMediator {
+    void sendMessage(String msg, AirCraft airCraft);
+    void addAirCraft(AirCraft airCraft);
+}
+```
+
+AirCraft.java:
+
+```java
+public abstract class AirCraft {
+    protected ATCMediator mediator;
+    protected String name;
+
+    public AirCraft(ATCMediator mediator, String name) {
+        this.mediator = mediator;
+        this.name = name;
+    }
+
+    public abstract void send(String msg);
+    public abstract void receive(String msg);
+}
+```
+
+ATCMediatorImpl.java:
+
+```java
+public class ATCMediatorImpl implements ATCMediator {
+    private List<AirCraft> airCraftList;
+
+    public ATCMediatorImpl() {
+        airCraftList = new ArrayList<>();
+    }
+
+    @Override
+    public void sendMessage(String msg, AirCraft airCraft) {
+        for (AirCraft a : airCraftList) {
+            // message should not be received by the aircraft sending the message
+            if (a != airCraft) {
+                a.receive(msg);
+            }
+        }
+    }
+
+    @Override
+    public void addAirCraft(AirCraft airCraft) {
+        airCraftList.add(airCraft);
+    }
+}
+```
+
+AirCraftImpl.java:
+
+```java
+public class AirCraftImpl extends AirCraft {
+    public AirCraftImpl(ATCMediator mediator, String name) {
+        super(mediator, name);
+    }
+
+    @Override
+    public void send(String msg) {
+        System.out.println(name + ": Sending message = " + msg);
+        mediator.sendMessage(msg, this);
+    }
+
+    @Override
+    public void receive(String msg) {
+        System.out.println(name + ": Receiving message = " + msg);
+    }
+}
+```
+
+MediatorPatternTest.java:
+
+```java
+public class MediatorPatternTest {
+    @Test
+    public void testMediatorPattern() {
+        ATCMediator mediator = new ATCMediatorImpl();
+
+        // Create few aircraft
+        AirCraft boing1 = new AirCraftImpl(mediator, "Boing 1");
+        AirCraft helicopter = new AirCraftImpl(mediator, "Helicopter");
+        AirCraft boing707 = new AirCraftImpl(mediator, "Boing 707");
+
+        // Adding aircraft to the mediator
+        mediator.addAirCraft(boing1);
+        // mediator.addAirCraft(helicopter);
+        mediator.addAirCraft(boing707);
+
+        boing1.send("Hello from Boing 1");
+    }
+}
+```
+
+## Visitor Pattern:
 
