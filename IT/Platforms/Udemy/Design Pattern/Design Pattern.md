@@ -1891,3 +1891,150 @@ public class MediatorPatternTest {
 
 ## Visitor Pattern:
 
+### Introduction:
+
+更策略模式有点像。
+
+### Code:
+
+Visitor.java:
+
+```java
+public interface Visitor {
+    double visitor(Shirt shirtItem);
+    double visitor(TShirt tShirtItem);
+    double visitor(Jacket jacketItem);
+}
+```
+
+Visitable.java:
+
+```java
+public interface Visitable {
+    double accept(Visitor visitor);
+}
+```
+
+TaxVisitor.java:
+
+```java
+public class TaxVisitor implements Visitor {
+    DecimalFormat decimalFormat = new DecimalFormat("###.##");
+
+    @Override
+    public double visitor(Shirt shirtItem) {
+        System.out.println("Shirt final price with tax: ");
+        return Double.parseDouble(decimalFormat.format(Double.parseDouble(decimalFormat.format(shirtItem.getPrice() * 0.10)) + shirtItem.getPrice()));
+    }
+
+    @Override
+    public double visitor(TShirt tShirtItem) {
+        System.out.println("TShirt final price with tax: ");
+        return Double.parseDouble(decimalFormat.format(Double.parseDouble(decimalFormat.format(tShirtItem.getPrice() * 0.18)) + tShirtItem.getPrice()));
+    }
+
+    @Override
+    public double visitor(Jacket jacketItem) {
+        System.out.println("Jacket final price with tax: ");
+        return Double.parseDouble(decimalFormat.format(Double.parseDouble(decimalFormat.format(jacketItem.getPrice() * 0.20)) + jacketItem.getPrice()));
+    }
+}
+```
+
+Shirt.java:
+
+```java
+public class Shirt implements Visitable {
+    private double price;
+
+    public Shirt(double price) {
+        this.price = price;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public double accept(Visitor visitor) {
+        return visitor.visitor(this);
+    }
+}
+```
+
+TShirt.java:
+
+```java
+public class TShirt implements Visitable {
+    private double price;
+
+    public TShirt(double price) {
+        this.price = price;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public double accept(Visitor visitor) {
+        return visitor.visitor(this);
+    }
+}
+```
+
+Jacket.java:
+
+```java
+public class Jacket implements Visitable {
+    private double price;
+
+    public Jacket(double price) {
+        this.price = price;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    @Override
+    public double accept(Visitor visitor) {
+        return visitor.visitor(this);
+    }
+}
+```
+
+VisitorPatternTest.java:
+
+```java
+public class VisitorPatternTest {
+    @Test
+    public void testVisitorPattern() {
+        Visitor taxVisitor = new TaxVisitor();
+
+        Shirt shirt = new Shirt(45.99);
+        TShirt tShirt = new TShirt(129.99);
+        Jacket jacket = new Jacket(399.99);
+
+        // Use out tax calculations
+        System.out.println(shirt.accept(taxVisitor));
+        System.out.println(tShirt.accept(taxVisitor));
+        System.out.println(jacket.accept(taxVisitor));
+    }
+}
+```
+
+## Memento Pattern:
+
