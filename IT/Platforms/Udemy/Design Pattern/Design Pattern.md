@@ -2038,3 +2038,110 @@ public class VisitorPatternTest {
 
 ## Memento Pattern:
 
+### Introduction:
+
+备忘录模式：能存储几个状态，用于后面回溯或者转换，即`undo`操作。
+
+### Code:
+
+Memento.java:
+
+```java
+public class Memento {
+    private String state;
+
+    public Memento(String state) {
+        this.state = state;
+    }
+
+    public String getState() {
+        return state;
+    }
+}
+```
+
+Originator.java:
+
+```java
+public class Originator {
+    // This string is just to simplify our understanding.
+    // In a real application you would have an actual Java
+    // model class: Person.java, Character.java etc.
+    private String state;
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public Memento createMemento() {
+        return new Memento(state);
+    }
+
+    public void setMemento(Memento memento) {
+        state = memento.getState();
+    }
+}
+```
+
+CareTaker.java:
+
+```java
+public class CareTaker {
+    private List<Memento> stateList = new ArrayList<>();
+
+    public void addMemento(Memento memento) {
+        stateList.add(memento);
+    }
+
+    public Memento getMemento(int index) {
+        return stateList.get(index);
+    }
+}
+```
+
+App.java:
+
+```java
+public class App {
+    public static void main( String[] args ) {
+        Originator originator = new Originator();
+        originator.setState("Monster");
+
+        Memento memento = originator.createMemento();
+
+        CareTaker careTaker = new CareTaker();
+        careTaker.addMemento(memento);
+
+        originator.setState("Monster 2");
+        originator.setState("Monster 3");
+
+        memento = originator.createMemento();
+        careTaker.addMemento(memento);
+
+        originator.setState("Monster 4");
+
+        System.out.println("Originator current state: " + originator.getState());
+
+        System.out.println("Originator restoring to previous state ... ");
+        memento = careTaker.getMemento(1);
+        originator.setMemento(memento);
+
+        System.out.println("Originator current state: " + originator.getState());
+
+        System.out.println("Originator restoring to previous state ... ");
+        memento = careTaker.getMemento(0);
+        originator.setMemento(memento);
+
+        System.out.println("Originator current state: " + originator.getState());
+    }
+}
+```
+
+## Interpreter Pattern:
+
+### Introduction:
+
