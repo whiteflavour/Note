@@ -2145,3 +2145,101 @@ public class App {
 
 ### Introduction:
 
+就如其名，比如对我们语言的解释，Chinese -> English；或者 Source Code -> Interpreter/Compiler -> Bytecode。
+
+### Code:
+
+InterpreterContext.java:
+
+```java
+public class InterpreterContext {
+    public String getBinaryFormat(int num) {
+        return Integer.toBinaryString(num);
+    }
+
+    public String getHexFormat(int num) {
+        return Integer.toHexString(num);
+    }
+}
+```
+
+Expression.java:
+
+```java
+public interface Expression {
+    String interpreter(InterpreterContext interpreterContext);
+}
+```
+
+IntToBinaryExpression.java:
+
+```java
+public class IntToBinaryExpression implements Expression {
+    private int num;
+
+    public IntToBinaryExpression(int num) {
+        this.num = num;
+    }
+
+    @Override
+    public String interpreter(InterpreterContext interpreterContext) {
+        return interpreterContext.getBinaryFormat(num);
+    }
+}
+```
+
+IntToHexExpression:
+
+```java
+public class IntToHexExpression implements Expression {
+    private int num;
+
+    public IntToHexExpression(int num) {
+        this.num = num;
+    }
+
+    @Override
+    public String interpreter(InterpreterContext interpreterContext) {
+        return interpreterContext.getHexFormat(num);
+    }
+}
+```
+
+App.java:
+
+```java
+public class App {
+    private InterpreterContext interpreterContext;
+
+    public static void main( String[] args ) {
+        String first = "13 in Binary";
+        String second = "28 in Hexadecimal";
+
+        App interpreter = new App(new InterpreterContext());
+        System.out.println(first + " = " + interpreter.interpret(first));
+        System.out.println(second + " = " + interpreter.interpret(second));
+    }
+
+    public App(InterpreterContext interpreterContext) {
+        this.interpreterContext = interpreterContext;
+    }
+
+    public String interpret(String str) {
+        Expression expression = null;
+        int num = Integer.parseInt(str.substring(0, str.indexOf(" ")));
+        if (str.contains("Hexadecimal")) {
+            expression = new IntToHexExpression(num);
+        } else if (str.contains("Binary")) {
+            expression = new IntToBinaryExpression(num);
+        } else {
+            return str;
+        }
+        return expression.interpreter(interpreterContext);
+    }
+}
+```
+
+## Chain of Responsibility Pattern:
+
+### Introduction:
+
