@@ -2243,3 +2243,134 @@ public class App {
 
 ### Introduction:
 
+不同层次的人，能力也不同，就要进行“区别对待”，即见什么样的人，说什么样的话。
+
+### Code:
+
+PurchasePower.java:
+
+```java
+public abstract class PurchasePower {
+    protected static final double BASE = 1000;
+    protected PurchasePower successor;
+
+    abstract protected double getAllowable();
+    abstract protected String getRole();
+
+    public PurchasePower getSuccessor() {
+        return successor;
+    }
+
+    public void setSuccessor(PurchasePower successor) {
+        this.successor = successor;
+    }
+
+    public void processRequest(PurchaseRequest request) {
+        if (request.getAmount() < getAllowable()) {
+            System.out.println(getRole() + " will approve $" + getAllowable());
+        } else if (successor != null) {
+            successor.processRequest(request);
+        } else {
+            System.out.println("Nobody can approve this!!!");
+        }
+    }
+}
+```
+
+PurchaseRequest.java:
+
+```java
+public class PurchaseRequest {
+    private double amount;
+    private String purpose;
+
+    public PurchaseRequest(double amount, String purpose) {
+        this.amount = amount;
+        this.purpose = purpose;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+}
+```
+
+CEOPurchasePower.java:
+
+```java
+public class CEOPurchasePower extends PurchasePower {
+    @Override
+    protected double getAllowable() {
+        return BASE * 100;
+    }
+
+    @Override
+    protected String getRole() {
+        return "CEO";
+    }
+}
+```
+
+DirectorPurchasePower.java:
+
+```java
+public class DirectorPurchasePower extends PurchasePower {
+    @Override
+    protected double getAllowable() {
+        return BASE * 20;
+    }
+
+    @Override
+    protected String getRole() {
+        return "Director";
+    }
+}
+```
+
+ManagerPurchasePower.java:
+
+```java
+public class ManagerPurchasePower extends PurchasePower {
+    @Override
+    protected double getAllowable() {
+        return BASE * 10;
+    }
+
+    @Override
+    protected String getRole() {
+        return "Manager";
+    }
+}
+```
+
+App.java:
+
+```java
+public class App {
+    public static void main( String[] args ) {
+        CEOPurchasePower ceoPurchasePower = new CEOPurchasePower();
+        DirectorPurchasePower directorPurchasePower = new DirectorPurchasePower();
+        ManagerPurchasePower managerPurchasePower = new ManagerPurchasePower();
+
+        directorPurchasePower.setSuccessor(ceoPurchasePower);
+        managerPurchasePower.setSuccessor(directorPurchasePower);
+
+        while (true) {
+            System.out.println("Enter the amount to check who should approve to their budget: ");
+            System.out.print(">>");
+
+            try {
+                double d = Double.parseDouble(new BufferedReader(new InputStreamReader(System.in)).readLine());
+                managerPurchasePower.processRequest(new PurchaseRequest(d, "Buy stuff"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+```
+
+## Bridge Pattern:
+
+### Introduction:
+
