@@ -2374,3 +2374,235 @@ public class App {
 
 ### Introduction:
 
+**没有Bridge：**既销售也生产，即工厂和商店合一，功能杂糅。
+
+![NonBridgeWay](/Users/fuck/Documents/Note/IT/Platforms/Udemy/Design Pattern/Pictures/Bridge Pattern/NonBridgeWay.png)
+
+**有Bridge：**商店销售，工厂生产。对Java来说就相当于把两种功能的多个类分开了，而功能相同的类聚在一块管理。
+
+![Bridge+DP](/Users/fuck/Documents/Note/IT/Platforms/Udemy/Design Pattern/Pictures/Bridge Pattern/Bridge+DP.png)
+
+### Advantages:
+
+It allows you to seperate the abstraction from the implementation.
+
+### Code:
+
+Vehicle.java:
+
+```java
+public abstract class Vehicle {
+    protected WorkShop workShop;
+    protected WorkShop workShop2;
+
+    public Vehicle(WorkShop workShop, WorkShop workShop2) {
+        this.workShop = workShop;
+        this.workShop2 = workShop2;
+    }
+
+    abstract public void manufacture();
+}
+```
+
+WorkShop.java:
+
+```java
+public interface WorkShop {
+    void make();
+}
+```
+
+Car.java:
+
+```java
+public class Car extends Vehicle {
+    public Car(WorkShop workShop, WorkShop workShop2) {
+        super(workShop, workShop2);
+    }
+
+    @Override
+    public void manufacture() {
+        System.out.println("Car...");
+        workShop.make();
+        workShop2.make();
+    }
+}
+```
+
+Bike.java:
+
+```java
+public class Bike extends Vehicle {
+    public Bike(WorkShop workShop, WorkShop workShop2) {
+        super(workShop, workShop2);
+    }
+
+    @Override
+    public void manufacture() {
+        System.out.println("Bike...");
+        workShop.make();
+        workShop2.make();
+    }
+}
+```
+
+Make.java:
+
+```java
+public class Make implements WorkShop {
+    @Override
+    public void make() {
+        System.out.println("Making...");
+    }
+}
+```
+
+Assemble.java:
+
+```java
+public class Assemble implements WorkShop {
+    @Override
+    public void make() {
+        System.out.print("..also ");
+        System.out.println("Assembled");
+    }
+}
+```
+
+App.java:
+
+```java
+public class App {
+    public static void main(String[] args) {
+        Vehicle bmw = new Car(new Make(), new Assemble());
+        bmw.manufacture();
+
+        Vehicle bmx = new Bike(new Make(), new Assemble());
+        bmx.manufacture();
+    }
+}
+```
+
+## Flyweight Pattern:
+
+### Introduction:
+
+如果我们要复制成千上万张图片，那么每次都创建对象是非常消耗资源的，所以我们创建许多原对象的**虚拟实例 (virtural instance)**。
+
+### Code:
+
+Shape.java:
+
+```java
+public interface Shape {
+    void draw();
+}
+```
+
+ShapeFactory.java:
+
+```java
+public class ShapeFactory {
+    private static final Map<String, Shape> circleMap = new HashMap<>();
+
+    public static Shape getCircle(String color) {
+        Circle circle = (Circle) circleMap.get(color);
+
+        if (circle == null) {
+            circle = new Circle(color);
+            circleMap.put(color, circle);
+            System.out.println("Making circle of color: " + color);
+        }
+        return circle;
+    }
+}
+```
+
+Circle.java:
+
+```java
+public class Circle implements Shape {
+    private String color;
+    private int x;
+    private int y;
+    private int radius;
+
+    public Circle(String color) {
+        this.color = color;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public int getX() {
+        return x;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
+    public void setY(int y) {
+        this.y = y;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    public void draw() {
+        System.out.println("Circle drawing... Color: " + color + " x: " + x
+            + " y: " + y + " radius: " + radius);
+    }
+}
+```
+
+App.java:
+
+```java
+public class App {
+    private static final String[] COLORS = {"Red", "Blue", "Pink", "Brown"};
+
+    public static void main(String[] args) {
+        for (int i = 0; i < 20; ++i) {
+            Circle circle = (Circle) ShapeFactory.getCircle(getRandomColor());
+            circle.setX(getRandomX());
+            circle.setY(getRandomY());
+            circle.setRadius(400);
+            circle.draw();
+        }
+    }
+
+    private static String getRandomColor() {
+        return COLORS[(int) (Math.random() * COLORS.length)];
+    }
+
+    private static int getRandomX() {
+        return (int) (Math.random() * 100);
+    }
+
+    private static int getRandomY() {
+        return (int) (Math.random() * 100);
+    }
+}
+```
+
+## 总结：
+
+掌握所有的设计模式也是很危险的，重要的是要理解我们学习他们的目的是学习**解决问题的方法**，而不是死记硬背。在不同的场景下灵活运用，甚至设计出专门适用于该场景的设计模式，才是重中之重。
+
+通过这么久的学习，设计模式和算法一样，都是要懂得有，这是从0 ->1的过程，学习他们主要是掌握解决问题的方法，为我们提供一个方向。若不学习他们，我们会落入思路都没有的境地。
