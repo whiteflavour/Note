@@ -93,5 +93,111 @@ prototype 的 bean，容器每次返回给请求方一个新的对象实例后�
 1. 方法注入。
 2. 方法替换。
 
-## 第五章、
+## 第五章、Spring IoC 容器 ApplicationContext
+
+**几种常用实现：**
+
+1. FileSystemXmlApplicationContext
+2. ClassPathXmlApplicationContext
+3. XmlWebApplicationContext
+
+### 5.1 统一资源加载策略：
+
+为了各司其职，Spring 提出了一套基于`org.springframework.core.io.Resource`和`ResourceLoader`接口的资源抽象和加载策略。
+
+ClassPathResource就是Resource的一个实现。
+
+要自己实现，实现`Resource`接口就是了。
+
+**ResourcePatternResolver - 批量查找的 ResourceLoader：**
+
+返回多个`Resource`实例，最常用的实现为`PathMatchingResourcePatternResolver`，该实现类支持`ResourceLoader`级别的资源加载，支持基于Ant风格的路径匹配模式（`**/*.suffix`），支持`ResourcePatternResolver`新增加的`classpath*:`前缀等，集所有技能于一身。可以指定一个`ResourceLoader`，否则使用`DefaultResourceLoader`。
+
+![Resource和ResourceLoader类层次图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter5/Resource和ResourceLoader类层次图.png)
+
+**ApplicationContext与ResourceLoader：**
+
+因为`ApplicationContext`继承了`ResourcePatternResolver`，所以任何的`ApplicationContext`的实现都可以看作是一个`ResourceLoader`甚至`ResourcePatternLoader`，这就是`ApplicationContext`支持Spring内统一资源加载策略的真相。
+
+![AbstractApplicationContext作为ResourceLoader和ResourcePatternLoader](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter5/AbstractApplicationContext作为ResourceLoader和ResourcePatternLoader.png)
+
+**ResourceLoader类型的注入：**
+
+实现`ResourceLoaderAware`或`ApplicationContextAware`接口。`ApplicationContextAware`更宽泛。
+
+**Resource类型的注入：**
+
+对于那些Spring容器提供的默认的`PropertyEditors`无法识别的对象类型，我们可以提供自定义的`PropertyEditors`实现并注册进容器中。
+
+默认情况下，`BeanFactory`容器不为`Resource`提供相应的`PropertyEditors`，但是`ApplicationContext`可以正确识别。它使用`ResourceEditorRegistrar`来注册针对`Resource`类型的PropertyEditor，即`ResourceEditor`。
+
+若需依赖一组Resource，可以使用`ResourceArrayPropertyEditor`，然后通过`CustomEditorConfigurar`告知容器。
+
+**特定情况下，ApplicationContext的Resource加载行为：**
+
+ResourceLoader 中增加了新的资源路径协议──`classpath:`，ResourcePatternResolver又增加了`classpath*:`。
+
+ClassPathXmlApplicationContext 默认从 classpath 中加载bean定义配置文件；而 FileSystemXmlApplicationContext从文件系统中加载。
+
+### 5.2 国际化信息支持（I18n MessageSource)：Internationalization，中间有18个字母，通常简写为I18n
+
+要全面了解Java中的I18n，建议参考O'Reilly出版的 Java Internationalization。
+
+Java 国际化信息处理主要涉及两个类：java.util.Local 和 java.util.ResourceBundle。通常，ResourceBundle 管理一组信息序列，所有的信息序列有统一的一个basename，然后特定的Local信息，可以根据basename后追加的语言或者地区代码来区分，如：
+
+```properties
+messages.properties
+messages_zh.properties
+messages_zh_CN.properties
+messages_en.properties
+messages_en_US.properties
+```
+
+注意：properties文件中的编码应该是ISO-8859-1，所以messages_zh_CN.properties中的各个键对应的内容不应该是中文，应该使用 native2ascii或者是类似的工具进行转码。
+
+**MessageSource 与 ApplicationContext：**
+
+Spring 提供了`MessageSource`。
+
+如果ApplicationContext找不到MessageSource的实现，那么其内部会默认实例化一个不含任何内容的StaticMessageSource实例，以保证相应的方法调用。若要添加`MessageSource`的实现，自己在配置文件中添加即可。
+
+**可用的MessageSource实现：**
+
+1. StaticMessageSource：多用于测试，不应该用于生产环境。
+2. ResourceBundleMessageSource：有缓存，最常用。
+3. ReloadableResourceBundleMessageSource：可定期检查并刷新properties文件的变更，所以应该避免将信息资源文件放到classpath中，这会影响其检查。
+
+上述三种都能独立于ApplicationContext运行。
+
+![MessageResource类层次结构](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter5/MessageResource类层次结构.png)
+
+**MessageSourceAware和MessageSource的注入：**
+
+ApplicationContext自动识别MessageSourceAware，最简单的方法是让需要国际化的类实现`MessageSourceAware`接口，然后注册到ApplicationContext容器，但是这样对容器的依赖性太强，显得容器具有较强的侵略性。
+
+应该直接通过构造方法或者setter方法注入的方式声明依赖，配置bean时，将ApplicationContext容器内部的那个messageSource注入该业务对象即可。
+
+**既然MessageSource可以独立使用，为什么还让ApplicationContext实现它？**
+
+在Web应用程序中通常会公开ApplicationContext给视图层(View)，这样，通过标签(tag)就可以直接访问国际化信息了。
+
+### 5.3 容器内部事件发布：
+
+Java SE: java.util.EventObject和EventListener。
+
+涉及三个角色：自定义事件类型、事件监听器和事件发布者。
+
+Spring：ApplicationEvent（三个实现：ContextClosedEvent, ContextRefreshedEvent, RequestHandleEvent）、ApplicationListener。可以自动识别。
+
+ApplicationContext还继承了ApplicationEventPublisher接口，并充当事件发布者。它将活转包给ApplicationEventMulticaster及其子类SimpleApplicationEventMulticaster。但是，默认使用`SyncTaskExecutor`进行发布。可以提供其它类型的`TaskExecutor`。
+
+ApplicationContext的事件发布机制只适用于单一容器内的简单消息通知和处理，并不适合分布式、多进程、多容器之间的事件通知，虽然可以曲折地通过使用Spring的Remoting，但弊大于利、失大于得。
+
+可以脱离容器直接使用`ApplicationEventMulticaster`进行事件发布。
+
+### 5.4 多配置模块加载的简化：
+
+通过ApplicationContext，可以以String[] 形式传入这些配置文件所在的路径，支持通配符。
+
+## 第六章、IoC容器扩展篇：
 
