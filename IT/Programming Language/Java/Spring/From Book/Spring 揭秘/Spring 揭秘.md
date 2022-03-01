@@ -201,3 +201,216 @@ ApplicationContext的事件发布机制只适用于单一容器内的简单消�
 
 ## 第六章、IoC容器扩展篇：
 
+### 6.1.1 注解版的自动绑定(@Autowired)：
+
+`AutowiredAnnotationBeanPostProcessor`是BeanPostProcessor的实现，可以自动检测`@Autowired`，只需要在配置文件中添加一个该类的`bean`定义即可。（必须使用`ApplicationContext`容器）
+
+**`@Qualifier`的陪伴：**
+
+@Autowired 是按类型匹配的；@Qualifier 按名字匹配。在@Autowired 后面增加@Qualifier语句，可以作进一步限定。
+
+@Qualifier 还可以用于标注注解类型，这主要用于自定义@Qualifier 的场合。
+
+### 6.1.2 @Autowired 之外的选择──使用JSR250 标注依赖注入关系：
+
+三个可用：@Resource, @PostConstruct和@PreDestroy。
+
+@Resource 与 @Autowired不同，它是 byName 来进行自动绑定的。
+
+@PostConstruct 和 @PreDestroy 不是服务于依赖注入的，而是用于标注对象生命周期管理相关方法的，相当于Spring中的`init-method`和`destroy-method`。
+
+同时JSR250的注解也需要一个BeanProcessor，即`CommonAnnotationBeanPostProcessor`。
+
+可以使用`<context:annnotation-config>`一键搞定上述所有配置。
+
+可以把两个派系的代码混合使用，只要别造成使用上的混乱即可。
+
+### 6.1.3 classpath-scanning 功能介绍：
+
+`<context:component-scan base-package="org.spring21"/>`
+
+从顶层 (org.spring21) 开始扫描，当扫到某个类进行了相应的注解标注后，就会提取该类的相关信息，构建对应的 BeanDefinition，然后将其注册进容器。
+
+可以对`base-package`进行过滤：
+
+```properties
+<context:component-scan base-package="org.spring21">
+	<context:include-filter type="annotation" expression="cn.spring21.annotation.FXService"/>
+	<context:exclude-filter type="aspectj" expression=".."/>
+</context:component-scan>
+```
+
+## 第七章、一起来看AOP：
+
+存在一个横切关注点，即很多地方都需要插入的一段代码、文件。。，如：日志，此时我们使用 AOP 将其织入即可，减少实现代码分布散乱的麻烦。
+
+### 7.4 AOP国家的公民：
+
+### 7.4.1 Joinpoint：
+
+织入点。
+
+### 7.4.2 Pointcut：
+
+织入点的表达方式。（横切逻辑）
+
+### 7.4.3 Advice：
+
+单一横切关注点逻辑的载体。
+
+主要有以下几种：
+
+1. Before Advice
+2. After Advice
+
+   1. After returning Advice
+
+   2. After throwing Advice
+
+   3. After Advice：或许叫 After (Finally) Advice 更确切
+3. Around Advice: J2EE 中的 `Filter`实际上就是`Around Advice`的一种体现。
+4. Introduction: 不根据横切逻辑的时机，而根据它可以完成的功能来区别。Introduction 可以为原有的对象添加新的特性或行为，就像你是一个普通公民，给你穿军装、戴军帽，添加了军人类型的Introduction之后，你就拥有军人的特征或者行为。
+   Introduction类型的Advice因实现技术不同，在具体软件环境中可能存在性能差异。
+
+### 7.4.4 Aspect
+
+是对系统中横切关注点逻辑进行封装的 AOP 概念实体。可以包含多个 Pointcut 和 Advice 相关定义。
+
+## 第八章、Spring AOP 概述及其实现机制：
+
+Spring AOP 简单而强大，如果它无法满足你，求助 AspectJ 好了。
+
+### 8.2 Spring AOP 的实现机制：
+
+属于二代 AOP，采用动态代理和字节码生成技术实现，在运行期间为目标对象生成一个代理对象，最终将代理对象织入，而非目标对象。
+
+实际上起源于代理设计模式。
+
+### 8.2.2 动态代理：
+
+主要有`java.lang.reflect.Proxy`和`java.lang.reflect.InvocationHandler`组成。
+
+**动态代理的缺点：**
+
+只能对实现了相应的 Interface 接口的类使用。
+
+如果Spring AOP 发现目标对象没有实现任何 Interface，则会尝试使用一个称为 CGLIB (Code Generation Library) 的开源动态字节码生成类库，为目标对象生成动态的代理对象实例。
+
+> Java Reflection In Action (Manning, 2005) 对Java的 Reflection 机制进行了详尽的阐述，其中有一章专门讲解了动态代理机制，不妨一读。
+
+### 8.2.3 动态字节码生成：
+
+**原理：**
+
+对目标对象进行继承扩展，为其生成相应的子类，而子类通过覆写来扩展父类的行为，只要将横切逻辑的实现放到子类中，然后让系统使用它，就可以达到与代理模式相同的效果了。
+
+对类进行扩展，首先需要实现一个`net.sf.cglib.proxy.Callback`，但更多时候我们直接使用`net.sf.cglib.proxy.MethodInterceptor`接口。
+
+**CGLIB唯一的限制：**
+
+无法对 final 方法进行覆写。
+
+**CGLIB官网：**
+
+http://cglib.sourceforge.net/。不过，文档并不多，读代码或许更加实际。
+
+## 第九章、Spring AOP 一世：
+
+虽然Spring AOP有两代，但是实现机制没变。
+
+### 9.1 Joinpoint：
+
+Spring AOP 仅支持方法级别的Joinpoint。
+
+### 9.2 Pointcut：
+
+`org.springframework.aop.Pointcut`接口是Pointcut中最顶层的抽象。
+
+![Pointcut局部“族谱”](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/Pointcut局部“族谱”.png)
+
+### 9.2.1 常见的Pointcut：
+
+1. NameMatchMethodPointcut
+2. JdkRegexpMethodPointcut
+3. Perl5RegexpMethodPointcut
+4. AnnotationMatchingPointcut
+5. ComposablePointcut：提供逻辑运算
+6. ControlFlowPointcut：可以指定只有当某个特定的类调用某方法时才对该方法进行拦截，而不管其他类。
+
+> ControlFlowPointcut 每次方法调用时都需要在运行期间检查程序的调用栈，所以性能较差。
+
+### 9.2.2 扩展 Pointcut（Customize Pointcut）：
+
+可以通过实现`StaticMethodMatcherPointcut`和`DynamicMethodMatcherPointcut`来自定义Pointcut。
+
+### 9.3 Advice：
+
+Spring AOP 加入了开源组织 AOP Alliance (http://aopalliance.sourceforge.net/)，目的在于标准化 AOP 的使用，促进各个AOP实现产品之间的可交互性。
+
+![Spring中Advice略图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/Spring中Advice略图.png)
+
+Advice按照其自身实例(instance) 能否在目标对象类的所有实例中共享这一标准，分为两大类：
+
+1. per-class类型
+2. per-instance
+
+### 9.3.1 per-class 类型的 Advice：
+
+该类型的Advice实例可以在目标对象类的所有实例之间共享。通常只提供方法拦截的功能，不会为目标对象类保存任何状态或者添加新的特性。
+
+除了Introduction类型的Advice外，其他都属于该类型。
+
+**1. Before Advice：**
+
+实现`org.springframework.aop.MethodBeforeAdvice`即可。是标志接口，该接口中没有任何方法。
+
+**2. ThrowsAdvice：**
+
+同理，实现`ThrowsAdvice`即可。
+
+**3. AfterReturningAdvice：**
+
+虽然可以访问到方法的返回值，但是不能更改，要更改需要用到 Around Advice。
+
+**4. Around Advice：**
+
+Spring AOP 没有提供After (Finally) Advice；AfterReturningAdvice 不能更改返回值。所以，是 Around Advice 的时候了。
+
+Spring没有直接提供定义对应 Around Advice的实现接口，而是直接采用了 AOP Alliance 的标准接口：`org.aopalliance.intercept.MethodInterceptor`，该接口**神通广大**：系统安全验证及检查、系统各处的性能检测、简单的日志记录以及系统附加行为的添加等，样样精通。
+
+记得调用MethodInterceptor的`proceed()`方法，除非你知道你在做什么，否则程序的执行会在当前MethodInterceptor处”短路“，Jointpoint 上的调用链将被中断，同一Joinpoint上的其他 MethodInterceptor 的逻辑以及 Jointpoint 处的方法逻辑不会执行。
+
+### 9.3.2 per-instance：
+
+**Introduction：**
+
+实现`IntroductionInterceptor`即可。
+
+不用执行`proceed()`方法，因为当前被拦截方法就是整个调用链中要最终执行的唯一方法。
+
+![Introduction相关类结构图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/Introduction相关类结构图.png)
+
+**两条分支：**
+
+1. 以DynamicIntroductionAdvice为首的动态分支：可以到运行时再去判定当前Introduction可应用到的目标接口类型，而不用预先就设定
+2. IntroductionInfo 的静态分支：与上述相反。
+
+要添加 Introduction 逻辑，使用 Spring 的两个实现类即可：（或者干脆直接自己实现IntroductionInterceptor接口）
+
+1. DelegatingIntroductionInterceptor：不自己实现行为，而是委派(delegate) 给其他实现类。它会使用它所持有的同一个”delegate“接口实例，供同一个目标类的所有实例共享使用。
+2. DelegatePerTargetObjectIntroductionInterceptor：如果根据当前目标对象实例没有找到对应的Introduction 实现类实例，该类就将会为其创建一个新的，然后添加到映射关系中。
+
+**这两个类的唯一区别：**
+
+在于构造方式上：我们不是自己构造delegate接口实例，而是告知DelegatePerTargetObjectIntroductionInterceptor相应的delegate 接口类型和对应实现类的类型就可以了。
+
+**扩展上述两个类或者IntroductionInterceptor接口的情况：**
+
+通常是因为目标对象的行为，与新附加到目标对象的状态和行为相关联。
+
+**Introduction的性能问题：**
+
+Spring AOP采用的动态代理机制，性能比AspectJ 的直接通过编译器将Introduction 织入目标对象逊色不少。若有必要，可以考虑采用 AspectJ 的Introduction 实现。
+
+### 9.4 Spring AOP 中的 Aspect：
+
