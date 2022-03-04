@@ -1,4 +1,4 @@
-# Spring 揭秘 (2021.5.12 - )
+# Spring 揭秘 (2021.5.12 - 2022.3.4)
 
 ## 序：
 
@@ -414,3 +414,564 @@ Spring AOP采用的动态代理机制，性能比AspectJ 的直接通过编译�
 
 ### 9.4 Spring AOP 中的 Aspect：
 
+Advisor就是Spring中的 Aspect，但是有不同：Advisor 只有一个Pointcut 和一个 Advice；而理论上Aspect 可以有多个。所以，我们可以认为Advisor 是一种特殊的 Aspect。
+
+**两个分支：**
+
+1. PointcutAdvisor
+2. IntroductionAdvisor
+
+### 9.4.1 PointcutAdvisor:
+
+**几个常用实现：**
+
+1. DefaultPointcutAdvisor：最常用
+2. NameMatchMethodPointcutAdvisor
+3. RegexpMethodPointcutAdvisor：默认使用`JdkRegexpMethodPoinitcut`，可以通过设置`setPerl5(true)`强制使用`Perl5RegexpMethodPointcut`
+4. DefaultBeanFactoryPointcutAdvisor：使用较少
+
+### 9.4.2 IntroductionAdvisor：
+
+**与PointcutAdvisor 最本质的区别：**
+
+IntroductionAdvisor 只能应用于类级别的拦截，只能使用 Introduction 型的 Advice。
+
+### 9.5 Spring AOP 的织入：
+
+**最基本的织入器：**`org.springframework.aop.framework.ProxyFactory`。
+
+**两种基本代理方式：**
+
+1. 基于接口
+2. 基于类
+
+![AopProxy相关结构图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/AopProxy相关结构图.png)
+
+**AdvisedSupport:**
+
+![AdvisedSupport类层次图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/AdvisedSupport类层次图.png)
+
+1. ProxyConfig：记载生成代理对象的控制信息
+2. Advised：承载生成代理对象所需要的必要信息，如相关目标类、Advice、Advisor等
+
+**Advised：**
+
+可以通过 Advised 来设置和查阅一些信息。
+
+直接操作Advised，更多时候用于测试场景。
+
+![ProxyFactory继承层次类图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/ProxyFactory继承层次类图.png)
+
+![ProxyFactory的“兄弟”](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter9/ProxyFactory的“兄弟”.png)
+
+### 9.5.3 容器中的织入器 ── ProxyFactoryBean：
+
+将 Spring AOP 与 Spring的 IoC 容器支持相结合，才是发挥Spring AOP更大作用的最佳途径。
+
+在IoC 容器中，使用 ProxyFactoryBean作为织入器。
+
+**ProxyFactoryBean的本质：**
+
+应该这样断词：Proxy + FactoryBean，而非ProxyFactory + Bean。
+
+ProxyFactoryBean 本质上是一个用来生产 Proxy 的 FactoryBean。跟 FactoryBean 类似，如果容器中某个对象持有某个 FactoryBean 的引用，它取的不是 FactoryBean 本身，而是 FactoryBean 的`getObject()`方法返回的对象。这也是 ProxyFactoryBean 能在容器中游刃有余的原因。
+
+### 9.5.4 加快织入的自动化进程：
+
+使用自动代理机制(Auto Proxy)。
+
+**1. 原理：**
+
+建立在 IoC 容器中的 BeanPostProcessor 概念之上。通过它，我们可以遍历 Bean，并对其进行操作。
+
+**2. 可用的 AutoProxyCreator：**
+
+1. BeanNameAutoProxyCreator：`beanNames`属性中可以使用`*`通配符简化配置；对于 String[] 类型的数组，可以不用`<list>`元素，而使用逗号分隔。
+2. DefaultAdvisorAutoProxyCreator：只需在`ApplicationContext`的配置文件中注册下bean定义即可。只对Advisor有效，因为只有Advisor才既有Pointcut信息以捕捉符合条件的目标对象，又有相应的Advice。
+   因为他的处理范围比较大，所以为了避免不必要的横切逻辑，应尽量细化各个Advisor的定义，或者转而使用`BeanNameAutoProxyCreator`。
+
+**3. 扩展AutoProxyCreator：**
+
+所有的AutoProxyCreator 都是 InstantiationAwareBeanPostProcessor，其与普通的 BeanPostProcessor 不同。当容器检测到这种类型的 BeanPostProcessor 的时候，会直接通过InstantiationAwareBeanPostProcessor 中的逻辑构造对象实例返回，即“短路”。这样，AutoProxyCreator 会返回代理对象，而非原目标对象。
+
+所以扩展，就继承`AbstractAutoProxyCreator`或者`AbstractAdvisorAutoProxyCreator`。
+
+### 9.6 TargetSource：
+
+### 9.6.1 可用的 TargetSource 实现类：
+
+1. SingletonTargetSource
+2. PrototypeTargetSource: 由于每次返回新的对象实例，所以需注意两点：1. bean必须是prototype 2. 通过 targetBeanName 指定Bean定义名称，而非引用。
+3. HotSwappableTargetSource：很有用，可用新的目标对象实例替换旧的目标对象实例(`swap()`)。
+4. CommonsPoolTargetSource：返回有限数目的目标对象实例，而不是每次都返回新的。（也可以扩展 AbstractPoolingTargetSource）
+5. ThreadLocalTargetSource：为不同线程提供不同的目标对象。（该类只是对 JDK的ThreadLocal进行了简单的封装。）
+
+### 9.6.2 自定义 TargetSource：
+
+直接实现TargetSource 接口。或者不在乎是否依赖于容器的话，可以直接扩展`org.springframework.aop.target`包中的几个抽象类。
+
+### 9.7 小结：
+
+重要的是掌握原理，后面的都是秉承着这些理念来进行进化的。
+
+## 第十章、Spring AOP 二世：
+
+### 10.1 @AspectJ 形式的 Spring AOP：
+
+可以使用注解了。
+
+其实本质就是多了一种表达方式，借了一下 AspectJ 的皮。就好像我们学习英语一样，它在世界上的影响范围广，我们学习它，为我所用，这也是一样的。
+
+### 10.1.1 使用：
+
+**1. 编程方式织入：**
+
+使用 AspectJProxyFactory。
+
+**2. 自动代理织入：**
+
+使用 AnnotationAwareAspectJAutoProxyCreator。
+
+使用基于 XSD 的配置方式将AnnotationAwareAspectJAutoProxyCreator 注册进容器：`<aop:aspectj-autoproxy proxy-target="ture"> </aop:aspectj-autoproxy>`。这背后的工作实际上是由`AnnotationAwareAspectJAutoProxyCreator`来做的。
+
+**注意：**
+
+使用@AspectJ形式的AOP的时，尽量使用自动代理法织入（测试除外），因为他们的一些行为并不统一，是有差异的。
+
+### 10.1.2 @AspectJ形式的 Pointcut：
+
+**1. @AspectJ形式Pointcut的声明方式：**
+
+通过使用Pointcut 注解实现。
+
+**2. @AspectJ形式Pointcut表达式的标志符：**
+
+只能使用 AspectJ中的少数。
+
+通常，this 和 target 与其他标志符结合使用，以进一步加强匹配的限定规则。
+
+@within只接受注解类型。
+
+**@within与@target的区别：**
+
+@within静态匹配，@target在运行时点动态匹配。
+
+@args 可以同时指定两个注解参数，但是 Spring 并不理睬。（需要使用逻辑运算符）
+
+@annotation 所接受的注解类型只应用于方法级别，即标注了@Target(ElementType.METHOD) 的注解声明。
+
+> 其实 Spring AOP 和 AspectJ 他们的语义还是有一定区别，虽然 Spring 借用了表达方式，但实现还是使用的 Spring 的底层。★
+
+**有关 Pointcut 表达式以及相关标志符的详细信息：**
+
+参考 AspectJ Programming Guide：http://www.eclipse.org/aspectj/doc/released/progguide/index.html。
+
+**3. @AspectJ形式的Pointcut在 Spring AOP 中的真面目：**
+
+实际上，@AspectJ 形式声明的所有 Pointcut 表达式，在 Spring AOP 内部都会通过解析，转化为具体的 Pointcut 对象。AspectJExpressiontPointcut 就代表 Spring AOP 中面向 AspectJ 的实现。
+
+对 bean 标志的生动介绍 ── 参考 Spring 团队的博文：http://blog.springsource.com/main/2007/09/24/the-new-bean-pointcut/。
+
+### 10.1.3 @AspectJ形式的 Advice：
+
+1. @Before
+2. @AfterReturning
+3. @AfterThrowing
+4. @After
+5. @Around
+6. @DeclareParents：用于标注 Introduction 类型的 Advice，但它标注对象的域 (Filed)，而非方法 (Method)。
+
+使用起来其实跟前面的差不多。
+
+### 10.1.4 @AspectJ 中的 Aspect 更多话题：
+
+**1. Advice 的执行顺序：**
+
+最先声明的 Advice 有最高优先级。Before Advice 先执行高优先级；AfterReturningAdvice 后执行高优先级。（类比函数嵌套）
+
+注意：如果使用编程的方式来使用Aspect，那么顺序完全由添加到 AspectJProxyFactory 的顺序决定。★
+
+### 10.2.1 基于 Schema 的 AOP 配置概览：
+
+`<aop:config>`和`AutoProxyCreator`两种方式不要一起使用，可能会造成一些问题。★
+
+注意：对于基于 Schema 的 AOP 来说，他的 Aspect 只支持 singleton 实例化模式。
+
+## 第十一章、AOP 应用案例：
+
+### 11.1 异常处理：
+
+使用 AOP 的方式进行异常处理，叫做 Fault Barrier，来自 dev2dev 上的一篇文章："Effective Java Exception"。
+
+文章中，作者把unchecked exception 称为 Fault，而将 checked exception 称为 Contingency。Fault Barrier 要处理的就是 Fault。
+
+### 11.1.2 Fault Barrier：
+
+unchecked exception 实际上可做的事情很少，通常就是记录日志、通知相应人员。所以，这些相同的逻辑可以归并于一处进行处理。
+
+### 11.2 安全检查：
+
+Filter 的资源访问控制，仅仅针对特定领域的安全检查需求，而 AOP 能对任何类型添加安全支持。
+
+现在也有专门的框架，Spring Security。
+
+### 11.3 缓存：
+
+AOP 可以为系统添加缓存，不是业务需求，而是系统需求。
+
+现在也有专门的产品实现，Spring 也有了Spring Cache。
+
+dev2dev 上有一篇文章："Declarative Caching Services for Spring" ── http://dev2dev.bea.com/pub/a/2006/05/declarative-caching.html/，专门介绍如何通过 Spring Cache 为应用程序添加声明性 Caching 支持。
+
+## 第十三章、统一的数据访问异常层次体系：
+
+![异常层次体系简图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter13/异常层次体系简图.png)
+
+## 第十四章、JDBC API 的最佳实践：
+
+Spring 提供了两种使用 JDBC API 的最佳实践：
+
+1. 以 JdbcTemplate 为核心的基于 Template 的 JDBC 使用方式：即直接导入 JDBC 包。
+2. 在 JdbcTemplate 基础之上构建的基于操作对象的 JDBC 使用方式：相当于使用框架。
+
+Spring 默认提供面向 Common DBCP、C3P0、Weblogic、WebSphere等数据源的NativeJdbcExtractor 实现类。
+
+可以在`org.springframework.jdbc.support.nativejdbc`包中获取所有这些实现类的更多信息。
+
+## 第十五章、Spring 对各种 ORM 的集成：
+
+### 15.1 Spring 对 Hibernate 的集成：
+
+Hibernate 的详细信息，参考官方文档和相关书籍：《Hibernate基础教程》（人邮出版社，2008.2）、《Hibernate 实战》（人邮出版社，2008.4），这两本书是优秀的 Hibernate 著作。★
+
+## 第十六章、Spring 数据访问之扩展篇：
+
+### 16.1 活用模板方法模式及 Callback：
+
+**各种框架在资源管理上的共性：**
+
+使用后安全地释放这些资源。
+
+与 Bitter Java 所提出的理念相同，为了确保尽可能地将资源的获取和资源的释放操作放在一起，Spring 在数据访问层处理资源的问题上，采用了模板方法模式。
+
+## 第二十二章、迈向 Spring MVC 的旅程：
+
+单独使用 JSP 阶段的 Web 开发，存在许多弊端，可以通过从 Rod Johnson 的 Expert One-on-One J2EE Design and Development 一书中了解更多详情。JSP Model1 也有其先进性，但是切记，不要以这种架构用于实际的生产环境。
+
+## 第二十三章、Spring MVC 初体验：
+
+### 23.1 鸟瞰 Spring MVC：
+
+Spring MVC 中的 Front Controller：DispatcherController，它接收所有请求，并委派给下一级控制器 (Controller) 去实现。
+
+**1. HandlerMapping：**
+
+专门管理 Web 请求到具体处理类的映射关系。
+
+### 23.2 实践出真知：
+
+**1. ContextLoaderListener 与 /WEB-INF/applicationContext.xml ：**
+
+在`web.xml`中首先通过`<listner>`元素添加一个ServletContextListener 的定义，即`ContextLoaderListener`。它为整个 Web 程序加载顶层的 WebApplicationContext (ROOT WebApplicationContext) ，主要用于提供应用所使用的中间层服务。数据源(DataSource)、数据访问对象(DAO)、服务对象(Services)等的定义都在其中注册。
+
+完全可以将其比作独立运行的应用程序中使用的 ClassPathXmlApplicationContext 或者 FileSystemXmlApplicationContext。不过，WebApplicationContext 专门用于 Web 环境下，在其中，我们可以自定义 scope 来注册相应的 bean了，包括 request、session等。
+
+默认路径：`/WEB-INF/applicationContext.xml`。★ 可以使用在`web.xml`中指定名称为`contextConfigLocation`的配置参数来更改它。详情查看`org.springframework.web.context.ContextLoader`，最终是委派给它来进行 WebApplicationContext 的加载。
+
+**ContextLoaderListener之外的选择：**
+
+若不支持，可以使用ContextLoaderServlet 来加载顶层的 WebApplicationContext，但是得通过调整 load-on-startup 的值，使其在其他 Servlet 之前启动。
+
+ContextLoaderListener 和 ContextLoaderServlet 加载相应路径下的容器配置文件，构建完相应的顶层WebApplicationContext 后，将其绑定到 ServletContext。要获取绑定到 ServletContext 的 WebApplicationContext，可以使用`WebApplicationContextUtils`类。
+
+任何类型的 Web 应用程序（基于 Java 的），只要能获取 ServletContext 的引用，就能获取并使用该 WebApplicationContext。即即使当前应用程序没有使用 Spring 提供的基于 IoC 容器的中国年层业务对象管理支持，也可以这样做。
+
+**2. DispatcherServlet 与 XXX-servlet.xml：**
+
+DispatcherServlet 基于 Front Controller。它启动之后加载`<servlet-name>-servlet.xml`配置文件，并构建相应的 WebApplicationContext。将之前通过 ContextLoaderListener 加载的顶层 WebApplicationContext 作为父容器，这样该配置文件中也能注入来自父容器的依赖了。
+
+### 23.2.2 按部就班地开始工作：
+
+**2. 开发独立的业务逻辑：**
+
+虽然 Web 层依赖于业务层对象，但业务层却不应该对 Web 层有任何依赖。Web 层只应该看作是公开业务逻辑的一种视角或者交互方式。
+
+好处：业务层可以独立设计并实现，而不需要关心最终通过什么手段将服务公开给用户（Spring Remoting）。
+
+**4. 添加 HandlerMapping：**
+
+默认使用 BeanNameUrlHandlerMapping。
+
+**5. 实现对应的 Controller 并添加到配置文件：**
+
+扩展AbstractController。
+
+**6. 添加 ViewResolver：**
+
+因为使用 JST/JSTL 作为视图技术，所以使用 InternalResourceViewResolver。
+
+**7. 实现相应的视图：**
+
+对于表格数据的实现，可以使用 DisplayTag 或者 eXtrmeTable 等开源的 Taglib，提高效率。
+
+## 第二十四章、近距离接触 Spring MVC主要角色：
+
+### 24.1 忙碌的协调人 HandlerMapping：
+
+### 24.1.1 可用的 HandlerMapping ：
+
+1. SimpleUrlHandlerMapping
+2. ControllerClassNameHandlerMapping
+3. DefaultAnnotationHandlerMapping
+
+**补充：Spring 的 PropertiesEditor 的作用：**
+
+将 bean 外部属性转换为内部属性（类型转换）。
+
+### 24.2.2 MultiActionController：
+
+在 4.3 被遗弃，被 Annotated Controllers 替代。
+
+### 24.2.3 SimpleFormController：
+
+专门处理单一表单；AbstractWizardFormController 提供多页面向导的交互能力。
+
+**1. 了解数据绑定：**
+
+为数据绑定一个目标对象，这个对象在 Spring中称为 Command 对象。
+
+> 可以在 org.springframework.beans.PropertyEditorRegistrySupport 的代码中发现所有默认注册的 PropertyEditor类型。
+
+有关绑定的参数表达式与 Command 对象属性之间的设置，可以进一步参考 Spring 文档的 "Bean manipulation and the BeanWrapper"。
+
+从参数获取到参数转型并绑定到 Command 对象，这个过程最终以 ServletRequestDataBinder 的形式进行封装。
+
+**2. Spring 框架数据验证简介：**
+
+核心类：Validator 和 org.springframework.validation.Errors。
+
+除了编程式，还可以借助 Commons Validator (http://commons.apache.org/validator) 或者 Valang (http://opensource.atlassian.com/confluence/spring/display/MODULES/Using+Valang+validator) 实现声明式的数据验证，详情参考 Spring MVC and Web Flow 一书。
+
+**3. 深入表单 (form) 处理流程：**
+
+SimpleFormController 及其父类 AbstractFormController 最主要的特点就是对表单的处理流程进行了统一。可以毫不夸张的说，只要掌握了 AbstractFormController 以及其子类的表单处理流程，就基本掌握了整个本派武功之精髓。
+
+![SimpleFormController处理流程图](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter24/SimpleFormController处理流程图.png)
+
+Backing Object 就是 Command 对象。
+
+### 24.2.4 AbstractWizardFormController：
+
+使用 IDE 创建一个项目，他们会引导我们进行一步步操作。对于这种向导式的简单的多页面流程的实现，就可以使用 AbstractWizardFormController，能简化工作。
+
+注意：它只能处理简单的多页面流程，他所管理的多个页面的数据，最终只绑定到一个 Command 对象上，只不过是每个页面绑定一部分而已。所以如果流程很复杂，建议集成 Spring Web Flow。Expert Spring MVC and Web Flow 一书对其进行了详尽的介绍。
+
+### 24.2.5 其他可用的 Controller 实行：
+
+1. AbstractCommandController：加强型的AbstractController
+2. ParameterizableViewController
+3. UrlFilenameViewController：处理不用任何处理直接返回的一组视图文件
+4. ServletForwardingController和 ServletWrappingController
+
+### 24.3 ModelAndView：
+
+我们倾向于使用逻辑是图名来标志视图，这样灵活性更高。除非必要，尽量不要直接返回具体的View实例。
+
+### 24.3.2 ModelAndView中的模型数据：
+
+模型中的数据对应的键需要与视图模板中的标志相对应。
+
+### 24.4 视图定位器 ViewResolver：
+
+大部分 ViewResolver 实现类，除了BeanNameViewResolver直接实现了 ViewResolver接口，都直接或间接继承自AbstractCachingViewResolver。因为性能原因，Spring 加入了缓存，默认打开。若在测试或者开发环境下，想即刻反映相应的修改结果，可以通过`setCache(false)`暂时关闭 AbstractCachingViewResolver 的缓存功能。
+
+### 24.4.1 可用的 ViewResolver 实现类：
+
+**1. 面向单一视图类型的 ViewResolver：**
+
+1. InternalResourceViewResolver
+2. FreeMarkerViewResolver/VelocityViewResolver
+3. JasperReportViewResolver
+4. XsltViewResolver
+
+更多内容可以参考 Javadoc 或者 Professional Java Development with the Spring Framework 一书。★
+
+**2. 面向多视图类型的 ViewResolver：**
+
+1. ResourceBundleViewResolver：继承了ResourceBundle 的国际化能力。
+
+注意：对于 Velocity （或者 Freemarker）的模板文件，最好将他们放入应用程序的 classpath 中进行加载，而不是依赖于默认的文件系统加载行为。
+
+2. XmlViewResolver：配置文件不同，使用`xml`文件进行配置。
+3. BeanNameViewResolver：可以认为是 XmlViewResolver 的原型版或者简化版。多用于快速搭建应用框架原型，或者构建小型的 Web 应用程序。对于正常的 Spring MVC 应用程序，应尽量避免将可以分离出来的视图配置信息一并加入到 DispatcherServlet 的 WebApplicationContext 中。★
+
+### 24.4.2 ViewResolver 查找序列（Chain Of ViewResolver）：
+
+如果为 DispatcherServlet 指定多个 ViewResolver 的话，不要给予 InternalResourceViewResolver 以及其他 UrlBaseViewResolver 子类过高的优先级，因为即使找不到相应的视图，他们也不会返回 null 以给我们轮询下一个 ViewResolver 的机会，这样，我们所指定的其他 ViewResolver 就形同虚设。
+
+### 24.5 各司其职的 View：
+
+### 24.5.2 可用的 View 实现类：
+
+顶层类：AbstractView。他的主要扩展类：AbstractUrlBasedView
+
+**1. 使用 JSP 技术的 View 实现：**
+
+1. InternalResourceView
+2. JstlView
+3. TilesView: 使用了 Struts 的 Tiles 视图技术。使用时必须提供 DefinitionFactory。
+4. TilesJstlView
+
+**2. 使用通用模板技术的 View 实现：**
+
+1. FreeMarkerView
+2. VelocityView
+
+**3. 面向二进制文档格式的 View 实现：**
+
+1. AbstractExcelView
+2. AbstractJExcelView
+
+**4. 面向 JasperReport 的 View 实现：**
+
+1. AbstractJasperReportsSingleFormatView
+2. JasperReportsMultiFormatView
+
+**5. 使用 XSLT 技术的 View 实现：**
+
+1. AbstractXsltView
+2. XsltView
+
+**6.RedirectView 和逻辑视图前缀名：**
+
+```java
+ModelAndView mav = new ModelAndView("redirect:addUser.do")；
+  ...
+return mav;
+```
+
+### 24.5.3 自定义 View 实现：
+
+继承 AbstractView。或者根据 URL 获取文件的话，直接继承 AbstractUrlBasedView 更好。
+
+## 第二十五章、认识更多 Spring MVC 家族成员：
+
+![三万英尺鸟瞰Spring MVC 的处理流程的逻辑结构](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter24/Chapter25/三万英尺鸟瞰Spring MVC 的处理流程的逻辑结构.png)
+
+![几千米高空再次鸟瞰](/Users/fuck/Documents/Note/IT/Programming Language/Java/Spring/From Book/Spring 揭秘/Pictures/Chapter24/Chapter25/几千米高空再次鸟瞰.png)
+
+### 25.1 文件上传与 MultipartResolver：
+
+使用最多的类库：Commons FileUpload。
+
+**两个可用的 MultipartResolver 实现类：**
+
+1. CommonsMultipartResolver
+2. CosMultipartResolver
+
+**两个 PropertyEditor 实现类进行类型转换：**
+
+1. ByteArrayMultipartFileEditor：将 MultipartFile 类型转换为 byte[] 类型
+2. StringMultipartFileEditor：将 MultipartFile 转化为 String
+
+### 25.2 Handler 与 HandlerAdaptor：
+
+HandlerAdaptor用于调用不同的 Handler，相当于指挥中心。
+
+**1. 可用的 Handler 类型：**
+
+Spring MVC 提供了一种与 WebWork的 Action 功能类似的 Handler 实现，即 ThrowawayController。它相对于 Handler 的最大优势是，不需要依赖任何 Servlet API，并能够为他们定义状态，这使得它有良好的可测试性。
+
+Spring 2.5 中已被遗弃，预计将在 Spring 3.0 中删除，而被基于注解的 Handler 类型取代。
+
+**2. 自定义 Handler：**
+
+只需想办法标识一下，使其能够被知道是 Handler 类即可，如使用注解。
+
+**对应 HandlerAdaptor 的实现：**
+
+1. SimpleControllerHandlerAdaptor - Controller 的HandlerAdaptor
+2. ThrowawayControllerHandlerAdaptor - ThrowawayController
+3. AnnotationMethodHandlerAdaptor - 基于注解的 Handler
+
+只要能给出对应的 HandlerAdaptor 的实现，任何类型的 Handler 都能纳入 Spring MVC 使用。
+
+### 25.3 框架内处理流程拦截与 HandlerInterceptor：
+
+HandlerExecutionChain 就是一个数据载体，它包含两方面的数据：
+
+1. 用于处理 Web 请求的 Handler
+2. 随同 Handler 遗弃返回的 HandlerInterceptor
+
+### 25.3.1 可用的 HandlerInterceptor 实现：
+
+1. UserRoleAuthorizationInterceptor：对用户角色 (UserRoles) 使用
+2. WebContentInterceptor
+
+### 25.3.2 自定义实现 HandlerInterceptor:
+
+继承 HandlerInterceptor。
+
+**Java API 设计的“光荣传统”：**
+
+对于那些需要经常被扩展，又包含多个方法需要实现的接口声明，通常使用者并非都想实现。为了避免每次都要全部实现的繁琐，API 设计者通常都会提供一个 XXXAdapter 类专门用于子类化的需要。注意：不要与 Adaptor 设计模式中的 Adaptor 混淆。
+
+### 25.3.3 HandlerInterceptor寻根：
+
+HandlerMapping是其顶层。所以，要使我们的 HandlerInterceptor 发挥作用，只需将它添加进相应的 HandlerMapping 即可。
+
+### 25.3.4 HandlerInterceptor 之外的选择：
+
+Filter。
+
+**区别：**
+
+1. HandlerInterceptor 拥有更细粒度的拦截点。
+2. Filter 有更高的执行优先级
+
+**如何选择？**
+
+对程序中一些普遍关注点进行统一处理，使用 Filter；需要细化处理流程的拦截逻辑，使用 HandlerInterceptor。
+
+**让Filter 更加自由：**
+
+Filter 是 servlet的标准组件，需要在 `web.xml `中配置，这意味着其生命周期管理更多由容器进行。如果我们在实现 Filter 期间需要某些服务的支持，就必须采用某种过度耦合的绑定机制或者查找方式来获取这些服务的支持。
+
+为了让 Filter 的实现更加无拘无束，尽情享受依赖注入，Spring MVC 引入了 DelegatingFilterProxy，使其生命周期由 WebApplicationContext 管理。可以通过`targetFilterLifeCycle`将其值设置为true 来使其还原为原始的 Web 容器管理。
+
+Spring MVC 还在`org.springframework.web.filter`包中提供了多个 Filter 的实现类。
+
+### 25.4 框架内的异常处理与 HandlerExceptionResolver：
+
+只提供了一个实现类：SimpleMappingExceptionResolver。
+
+### 25.5 国际化视图与 LocaleResovler：
+
+### 25.5.1 可用的 LocaleResolver：
+
+1. FixedLocaleResolver：一直保持一个 Locale 值不变，所以不能通过`setLocale`更改。
+2. AcceptHeaderLocaleResolver：根据 Accept-Language 协议头解析并返回 Locale 值，因为不能更改 Accept-Language 协议头，故也无法更改其 Locale 值
+3. SessionLocaleResolver：可以更改 Locale 值。若无法从 Session 获取，也没有默认 Locale 值，将从 Accept-Language 头获取。
+4. CookieLocaleResolver：与Session 类似。只要用户不禁止 Cookie，就能更改 Locale 值。
+
+### 25.5.3 Locale 的变更与 LocaleChangeHandler：
+
+使用LocaleChangeHandler。
+
+### 25.6 主题（Theme）与 ThemeResolver：
+
+由 ThemeSource 负责。
+
+### 25.6.2 管理主题的 ThemeResolver：
+
+解析当前请求的主题是什么。
+
+**三种管理策略：**
+
+除了Accept-Language，其他三种都可以。
+
+### 25.6.3 切换主题的 ThemeChangeInterceptor
+
+## 第二十六章、Spring MVC 中基于注解的 Controller：
+
+实际上就是一个普通的 POJO，使用注解附加了一些相关元数据信息而已。
