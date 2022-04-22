@@ -1,4 +1,4 @@
-# Maven 换源
+# Maven 换源：
 
 在 settings.xml 文件中，将 settings **标签** 中的内容替换为：
 
@@ -48,3 +48,38 @@
 
     </mirrors>
 ```
+
+# 代理：
+
+~/.m2/settings.xml: 
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <proxies>
+    <proxy>
+      <id>optional</id>
+      <active>true</active>
+      <protocol>http</protocol>
+      <!--<username>proxyuser</username>
+      <password>proxypass</password>-->
+      <host>127.0.0.1</host>
+      <port>7890</port>
+      <!--<nonProxyHosts>local.net|some.host.com</nonProxyHosts>-->
+    </proxy>
+    <proxy>
+      <id>optional</id>
+      <active>true</active>
+      <protocol>https</protocol>
+      <!--<username>proxyuser</username>
+      <password>proxypass</password>-->
+      <host>127.0.0.1</host>
+      <port>7890</port>
+      <!--<nonProxyHosts>local.net|some.host.com</nonProxyHosts>-->
+    </proxy>
+  </proxies>
+</settings>
+```
+
